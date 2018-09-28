@@ -12,6 +12,8 @@ int $ten = 10;
 global proc add ( int $x, int $y ) {
 	return $x + $y;
 }
+!-/*5;
+5 < 10 > 5;
 `
 
 	tests := []struct {
@@ -45,6 +47,18 @@ global proc add ( int $x, int $y ) {
 		{token.IDENT, "$y"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.BANG, "!"},
+		{token.MINUS, "-"},
+		{token.SLASH, "/"},
+		{token.ASTERISK, "*"},
+		{token.INT_DATA, "5"},
+		{token.SEMICOLON, ";"},
+		{token.INT_DATA, "5"},
+		{token.LT, "<"},
+		{token.INT_DATA, "10"},
+		{token.GT, ">"},
+		{token.INT_DATA, "5"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
