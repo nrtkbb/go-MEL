@@ -9,13 +9,14 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
-const PROMPT = ">> "
+const prompt = ">> "
 
+// Start は in を解析して out に書き出すループを実行する
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
 	for {
-		fmt.Print(PROMPT)
+		fmt.Print(prompt)
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -25,7 +26,7 @@ func Start(in io.Reader, out io.Writer) {
 		l := lexer.New(line)
 
 		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
+			fmt.Fprintf(out, "%+v\n", tok)
 		}
 	}
 }

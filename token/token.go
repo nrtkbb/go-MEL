@@ -1,84 +1,88 @@
 package token
 
-type TokenType string
+// Type ...
+type Type string
 
+// Token ...
 type Token struct {
-	Type    TokenType
+	Type    Type
 	Literal string
 }
 
+// Type strings.
 const (
-	ILLEGAL = "ILLEGAL"
+	Illegal = "Illegal"
 	EOF     = "EOF"
 
 	// 識別子 + リテラル
-	IDENT       = "IDENT"      // $add, $foobar, $x, $y, ...
-	PROC_IDENT  = "PROC_IDENT" // add, FuncName, ...
-	INT_DATA    = "INT_DATA"   // 1343456
-	INT_16DATA  = "INT_16DATA" // 0xA0, 0xfff, ...
-	FLOAT_DATA  = "FLOAT_DATA" // 1.1, 1e-3, 1e+3, ...
-	STRING_DATA = "STRING_DATA"
+	Ident      = "Ident"     // $add, $foobar, $x, $y, ...
+	ProcIdent  = "ProcIdent" // add, FuncName, ...
+	IntData    = "IntData"   // 1343456
+	Int16Data  = "Int16Data" // 0xA0, 0xfff, ...
+	FloatData  = "FloatData" // 1.1, 1e-3, 1e+3, ...
+	StringData = "StringData"
 
 	// 演算子
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	SLASH    = "/"
-	ASTERISK = "*"
-	BANG     = "!"
+	Assign   = "="
+	Plus     = "+"
+	Minus    = "-"
+	Slash    = "/"
+	Asterisk = "*"
+	Bang     = "!"
 
-	LT = "<"
-	GT = ">"
+	Lt = "<"
+	Gt = ">"
 
-	EQ     = "=="
-	NOT_EQ = "!="
+	Eq    = "=="
+	NotEq = "!="
 
 	// デリミタ
-	COMMA     = ","
-	SEMICOLON = ";"
+	Comma     = ","
+	Semicolon = ";"
 
-	LPAREN   = "("
-	RPAREN   = ")"
-	LBRACE   = "{"
-	RBRACE   = "}"
-	LBRACKET = "["
-	RBRACKET = "]"
-	LTENSOR  = "<<"
-	RTENSOR  = ">>"
+	Lparen   = "("
+	Rparen   = ")"
+	Lbrace   = "{"
+	Rbrace   = "}"
+	Lbracket = "["
+	Rbracket = "]"
+	Ltensor  = "<<"
+	Rtensor  = ">>"
 
-	// キーワード
-	GLOBAL = "GLOBAL"
-	PROC   = "PROC"
-	STRING = "STRING"
-	INT    = "INT"
-	FLOAT  = "FLOAT"
-	VECTOR = "VECTOR"
-	MATRIX = "MATRIX"
-	TRUE   = "TRUE"
-	FALSE  = "FALSE"
-	IF     = "IF"
-	ELSE   = "ELSE"
-	RETURN = "RETURN"
+	// For LookupIdent
+	Global = "Global"
+	Proc   = "Proc"
+	String = "String"
+	Int    = "Int"
+	Float  = "Float"
+	Vector = "Vector"
+	Matrix = "Matrix"
+	True   = "True"
+	False  = "False"
+	If     = "If"
+	Else   = "Else"
+	Return = "Return"
 )
 
-var keywords = map[string]TokenType{
-	"global": GLOBAL,
-	"proc":   PROC,
-	"string": STRING,
-	"int":    INT,
-	"float":  FLOAT,
-	"vector": VECTOR,
-	"matrix": MATRIX,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
+var keywords = map[string]Type{
+	"global": Global,
+	"proc":   Proc,
+	"string": String,
+	"int":    Int,
+	"float":  Float,
+	"vector": Vector,
+	"matrix": Matrix,
+	"true":   True,
+	"false":  False,
+	"if":     If,
+	"else":   Else,
+	"return": Return,
 }
 
-func LookupIdent(ident string) TokenType {
+// LookupIdent ...
+func LookupIdent(ident string) Type {
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
-	return PROC_IDENT
+	return ProcIdent
 }

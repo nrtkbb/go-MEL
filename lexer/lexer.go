@@ -4,13 +4,15 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+// Lexer は字句解析を行うための構造体
 type Lexer struct {
-	input        []rune
-	position     int
-	readPosition int
-	rune         rune
+	input        []rune // 字句解析対象のすべてのrune配列
+	position     int    // 字句解析中のinputのインデックス
+	readPosition int    // 字句解析中の一つ先のinputのインデックス
+	rune         rune   // positionの位置にあるrune
 }
 
+// New はMELの文字列を受け取りLexerを生成して返す
 func New(input string) *Lexer {
 	l := &Lexer{input: []rune(input)}
 	l.readRune()
@@ -24,21 +26,21 @@ func (l *Lexer) readRune() {
 		l.rune = rune(l.input[l.readPosition])
 	}
 	l.position = l.readPosition
-	l.readPosition += 1
+	l.readPosition++
 }
 
 func (l *Lexer) peekRune() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
-	} else {
-		return l.input[l.readPosition]
 	}
+	return l.input[l.readPosition]
 }
 
-func newToken(tokenType token.TokenType, r rune) token.Token {
+func newToken(tokenType token.Type, r rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(r)}
 }
 
+// NextToken は実行される度に一つずつTokenを生成して返す
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -46,44 +48,44 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.rune {
 	case '=':
-		tok = l.peekRuneCheck('=', token.EQ, token.ASSIGN)
+		tok = l.peekRuneCheck('=', token.Eq, token.Assign)
 	case '!':
-		tok = l.peekRuneCheck('=', token.NOT_EQ, token.BANG)
+		tok = l.peekRuneCheck('=', token.NotEq, token.Bang)
 	case '<':
-		tok = l.peekRuneCheck('<', token.LTENSOR, token.LT)
+		tok = l.peekRuneCheck('<', token.Ltensor, token.Lt)
 	case '>':
-		tok = l.peekRuneCheck('>', token.RTENSOR, token.GT)
+		tok = l.peekRuneCheck('>', token.Rtensor, token.Gt)
 	case ';':
-		tok = newToken(token.SEMICOLON, l.rune)
+		tok = newToken(token.Semicolon, l.rune)
 	case '(':
-		tok = newToken(token.LPAREN, l.rune)
+		tok = newToken(token.Lparen, l.rune)
 	case ')':
-		tok = newToken(token.RPAREN, l.rune)
+		tok = newToken(token.Rparen, l.rune)
 	case '{':
-		tok = newToken(token.LBRACE, l.rune)
+		tok = newToken(token.Lbrace, l.rune)
 	case '}':
-		tok = newToken(token.RBRACE, l.rune)
+		tok = newToken(token.Rbrace, l.rune)
 	case '[':
-		tok = newToken(token.LBRACKET, l.rune)
+		tok = newToken(token.Lbracket, l.rune)
 	case ']':
-		tok = newToken(token.RBRACKET, l.rune)
+		tok = newToken(token.Rbracket, l.rune)
 	case ',':
-		tok = newToken(token.COMMA, l.rune)
+		tok = newToken(token.Comma, l.rune)
 	case '+':
-		tok = newToken(token.PLUS, l.rune)
+		tok = newToken(token.Plus, l.rune)
 	case '-':
-		tok = newToken(token.MINUS, l.rune)
+		tok = newToken(token.Minus, l.rune)
 	case '/':
-		tok = newToken(token.SLASH, l.rune)
+		tok = newToken(token.Slash, l.rune)
 	case '*':
-		tok = newToken(token.ASTERISK, l.rune)
+		tok = newToken(token.Asterisk, l.rune)
 	case '$':
 		tok.Literal = l.readIdentifier()
-		tok.Type = token.IDENT
+		tok.Type = token.Ident
 		return tok
 	case '"':
 		tok.Literal = l.readString()
-		tok.Type = token.STRING_DATA
+		tok.Type = token.StringData
 		return tok
 	case 0:
 		tok.Literal = ""
@@ -95,14 +97,14 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		} else if isDigit(l.rune) || '.' == l.rune && isDigit(l.peekRune()) {
 			if '0' == l.rune && 'x' == l.peekRune() {
-				tok.Type = token.INT_16DATA
+				tok.Type = token.Int16Data
 				tok.Literal = l.readHexadecimalNumber()
 			} else {
 				tok.Type, tok.Literal = l.readNumber()
 			}
 			return tok
 		} else {
-			tok = newToken(token.ILLEGAL, l.rune)
+			tok = newToken(token.Illegal, l.rune)
 		}
 	}
 
@@ -110,15 +112,14 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.TokenType) token.Token {
+func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.Type) token.Token {
 	if peek == l.peekRune() {
 		ch := l.rune
 		l.readRune()
 		literal := string(ch) + string(l.rune)
 		return token.Token{Type: trueType, Literal: literal}
-	} else {
-		return newToken(falseType, l.rune)
 	}
+	return newToken(falseType, l.rune)
 }
 
 func (l *Lexer) readString() string {
@@ -165,15 +166,15 @@ func isHexadecimalDigit(r rune) bool {
 	return '0' <= r && r <= '9' || 'a' <= r && r <= 'f' || 'A' <= r && r <= 'F'
 }
 
-func (l *Lexer) readNumber() (token.TokenType, string) {
-	var typ token.TokenType
-	typ = token.INT_DATA
+func (l *Lexer) readNumber() (token.Type, string) {
+	var typ token.Type
+	typ = token.IntData
 	position := l.position
 	for isDigit(l.rune) {
 		l.readRune()
 	}
 	if '.' == l.rune {
-		typ = token.FLOAT_DATA
+		typ = token.FloatData
 		l.readRune()
 		for isDigit(l.rune) {
 			l.readRune()
