@@ -31,6 +31,7 @@ $int16 = 0xFF;
 float $float = 1.0;
 $float = 1.0e-3;
 $float = 1.0e+3;
+$float = .01;
 `
 
 	tests := []struct {
@@ -126,6 +127,10 @@ $float = 1.0e+3;
 		{token.IDENT, "$float"},
 		{token.ASSIGN, "="},
 		{token.FLOAT_DATA, "1.0e+3"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "$float"},
+		{token.ASSIGN, "="},
+		{token.FLOAT_DATA, ".01"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}

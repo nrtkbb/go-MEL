@@ -27,7 +27,7 @@ func (l *Lexer) readRune() {
 	l.readPosition += 1
 }
 
-func (l *Lexer) peekChar() rune {
+func (l *Lexer) peekRune() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
 	} else {
@@ -46,7 +46,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.rune {
 	case '=':
-		if l.peekChar() == '=' {
+		if l.peekRune() == '=' {
 			ch := l.rune
 			l.readRune()
 			literal := string(ch) + string(l.rune)
@@ -55,7 +55,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ASSIGN, l.rune)
 		}
 	case '!':
-		if l.peekChar() == '=' {
+		if l.peekRune() == '=' {
 			ch := l.rune
 			l.readRune()
 			literal := string(ch) + string(l.rune)
@@ -99,8 +99,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
-		} else if isDigit(l.rune) {
-			if '0' == l.rune && 'x' == l.peekChar() {
+		} else if isDigit(l.rune) || '.' == l.rune && isDigit(l.peekRune()) {
+			if '0' == l.rune && 'x' == l.peekRune() {
 				tok.Type = token.INT_16DATA
 				tok.Literal = l.readHexadecimalNumber()
 			} else {
@@ -162,7 +162,8 @@ func (l *Lexer) readNumber() (token.TokenType, string) {
 		}
 	}
 	if 'e' == l.rune || 'E' == l.rune {
-		if '-' == l.peekChar() || '+' == l.peekChar() {
+		typ = token.FLOAT_DATA
+		if '-' == l.peekRune() || '+' == l.peekRune() {
 			l.readRune()  // 'e' or 'E'
 			l.readRune()  // '-' or '+'
 			for isDigit(l.rune) {
