@@ -81,6 +81,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = l.readIdentifier()
 		tok.Type = token.IDENT
 		return tok
+	case '"':
+		tok.Literal = l.readString()
+		tok.Type = token.STRING_DATA
+		return tok
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -117,9 +121,22 @@ func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.TokenType) (t
 	}
 }
 
+func (l *Lexer) readString() string {
+	position := l.position
+	l.readRune() // '"'
+	for '"' != l.rune {
+		if '\\' == l.rune {
+			l.readRune() // '\\'
+		}
+		l.readRune()
+	}
+	l.readRune() // '"'
+	return string(l.input[position:l.position])
+}
+
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	l.readRune() // はじめの $ をスキップする
+	l.readRune() // '$'
 	for isIdentifier(l.rune) {
 		l.readRune()
 	}

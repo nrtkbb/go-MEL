@@ -35,6 +35,7 @@ $float = .01;
 
 vector $vec = <<1, 2, 3.0>>;
 matrix $mat[1][2] = <<1, 2; 3.0, 4.0>>;
+string $str = "test \"test\"";
 `
 
 	tests := []struct {
@@ -164,6 +165,11 @@ matrix $mat[1][2] = <<1, 2; 3.0, 4.0>>;
 		{token.COMMA, ","},
 		{token.FLOAT_DATA, "4.0"},
 		{token.RTENSOR, ">>"},
+		{token.SEMICOLON, ";"},
+		{token.STRING, "string"},
+		{token.IDENT, "$str"},
+		{token.ASSIGN, "="},
+		{token.STRING_DATA, "\"test \\\"test\\\"\""},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
