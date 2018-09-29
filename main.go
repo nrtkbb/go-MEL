@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/nrtkbb/go-MEL/repl"
 	"os"
 	"os/user"
+
+	"github.com/nrtkbb/go-MEL/repl"
 )
 
 func main() {

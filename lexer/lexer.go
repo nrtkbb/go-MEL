@@ -110,7 +110,7 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.TokenType) (token.Token) {
+func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.TokenType) token.Token {
 	if peek == l.peekRune() {
 		ch := l.rune
 		l.readRune()

@@ -1,8 +1,9 @@
 package lexer
 
 import (
-	"github.com/nrtkbb/go-MEL/token"
 	"testing"
+
+	"github.com/nrtkbb/go-MEL/token"
 )
 
 func TestNextToken(t *testing.T) {
