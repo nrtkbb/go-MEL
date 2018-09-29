@@ -135,8 +135,8 @@ func isIdentifier(r rune) bool {
 
 func (l *Lexer) readHexadecimalNumber() string {
 	position := l.position
-	l.readRune()  // 0
-	l.readRune()  // x
+	l.readRune()  // '0'
+	l.readRune()  // 'x'
 	for isHexadecimalDigit(l.rune) {
 		l.readRune()
 	}
@@ -163,8 +163,8 @@ func (l *Lexer) readNumber() (token.TokenType, string) {
 	}
 	if 'e' == l.rune || 'E' == l.rune {
 		if '-' == l.peekChar() || '+' == l.peekChar() {
-			l.readRune()
-			l.readRune()
+			l.readRune()  // 'e' or 'E'
+			l.readRune()  // '-' or '+'
 			for isDigit(l.rune) {
 				l.readRune()
 			}
