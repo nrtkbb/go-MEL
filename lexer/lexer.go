@@ -162,7 +162,6 @@ func (l *Lexer) readNumber() (token.TokenType, string) {
 		}
 	}
 	if 'e' == l.rune || 'E' == l.rune {
-		typ = token.FLOAT_DATA
 		if '-' == l.peekRune() || '+' == l.peekRune() {
 			l.readRune()  // 'e' or 'E'
 			l.readRune()  // '-' or '+'
