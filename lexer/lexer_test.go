@@ -32,6 +32,9 @@ float $float = 1.0;
 $float = 1.0e-3;
 $float = 1.0e+3;
 $float = .01;
+
+vector $vec = <<1, 2, 3.0>>;
+matrix $mat[1][2] = <<1, 2; 3.0, 4.0>>;
 `
 
 	tests := []struct {
@@ -131,6 +134,36 @@ $float = .01;
 		{token.IDENT, "$float"},
 		{token.ASSIGN, "="},
 		{token.FLOAT_DATA, ".01"},
+		{token.SEMICOLON, ";"},
+		{token.VECTOR, "vector"},
+		{token.IDENT, "$vec"},
+		{token.ASSIGN, "="},
+		{token.LTENSOR, "<<"},
+		{token.INT_DATA, "1"},
+		{token.COMMA, ","},
+		{token.INT_DATA, "2"},
+		{token.COMMA, ","},
+		{token.FLOAT_DATA, "3.0"},
+		{token.RTENSOR, ">>"},
+		{token.SEMICOLON, ";"},
+		{token.MATRIX, "matrix"},
+		{token.IDENT, "$mat"},
+		{token.LBRACKET, "["},
+		{token.INT_DATA, "1"},
+		{token.RBRACKET, "]"},
+		{token.LBRACKET, "["},
+		{token.INT_DATA, "2"},
+		{token.RBRACKET, "]"},
+		{token.ASSIGN, "="},
+		{token.LTENSOR, "<<"},
+		{token.INT_DATA, "1"},
+		{token.COMMA, ","},
+		{token.INT_DATA, "2"},
+		{token.SEMICOLON, ";"},
+		{token.FLOAT_DATA, "3.0"},
+		{token.COMMA, ","},
+		{token.FLOAT_DATA, "4.0"},
+		{token.RTENSOR, ">>"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}

@@ -46,23 +46,13 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.rune {
 	case '=':
-		if l.peekRune() == '=' {
-			ch := l.rune
-			l.readRune()
-			literal := string(ch) + string(l.rune)
-			tok = token.Token{Type:token.EQ, Literal:literal}
-		} else {
-			tok = newToken(token.ASSIGN, l.rune)
-		}
+		tok = l.peekRuneCheck('=', token.EQ, token.ASSIGN)
 	case '!':
-		if l.peekRune() == '=' {
-			ch := l.rune
-			l.readRune()
-			literal := string(ch) + string(l.rune)
-			tok = token.Token{Type:token.NOT_EQ, Literal:literal}
-		} else {
-			tok = newToken(token.BANG, l.rune)
-		}
+		tok = l.peekRuneCheck('=', token.NOT_EQ, token.BANG)
+	case '<':
+		tok = l.peekRuneCheck('<', token.LTENSOR, token.LT)
+	case '>':
+		tok = l.peekRuneCheck('>', token.RTENSOR, token.GT)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.rune)
 	case '(':
@@ -73,6 +63,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LBRACE, l.rune)
 	case '}':
 		tok = newToken(token.RBRACE, l.rune)
+	case '[':
+		tok = newToken(token.LBRACKET, l.rune)
+	case ']':
+		tok = newToken(token.RBRACKET, l.rune)
 	case ',':
 		tok = newToken(token.COMMA, l.rune)
 	case '+':
@@ -83,10 +77,6 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.SLASH, l.rune)
 	case '*':
 		tok = newToken(token.ASTERISK, l.rune)
-	case '<':
-		tok = newToken(token.LT, l.rune)
-	case '>':
-		tok = newToken(token.GT, l.rune)
 	case '$':
 		tok.Literal = l.readIdentifier()
 		tok.Type = token.IDENT
@@ -116,6 +106,17 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
+func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.TokenType) (token.Token) {
+	if peek == l.peekRune() {
+		ch := l.rune
+		l.readRune()
+		literal := string(ch) + string(l.rune)
+		return token.Token{Type: trueType, Literal: literal}
+	} else {
+		return newToken(falseType, l.rune)
+	}
+}
+
 func (l *Lexer) readIdentifier() string {
 	position := l.position
 	l.readRune() // はじめの $ をスキップする
@@ -135,8 +136,8 @@ func isIdentifier(r rune) bool {
 
 func (l *Lexer) readHexadecimalNumber() string {
 	position := l.position
-	l.readRune()  // '0'
-	l.readRune()  // 'x'
+	l.readRune() // '0'
+	l.readRune() // 'x'
 	for isHexadecimalDigit(l.rune) {
 		l.readRune()
 	}
@@ -163,8 +164,8 @@ func (l *Lexer) readNumber() (token.TokenType, string) {
 	}
 	if 'e' == l.rune || 'E' == l.rune {
 		if '-' == l.peekRune() || '+' == l.peekRune() {
-			l.readRune()  // 'e' or 'E'
-			l.readRune()  // '-' or '+'
+			l.readRune() // 'e' or 'E'
+			l.readRune() // '-' or '+'
 			for isDigit(l.rune) {
 				l.readRune()
 			}

@@ -12,8 +12,8 @@ const (
 	EOF     = "EOF"
 
 	// 識別子 + リテラル
-	IDENT    = "IDENT"    // $add, $foobar, $x, $y, ...
-	INT_DATA = "INT_DATA" // 1343456
+	IDENT      = "IDENT"      // $add, $foobar, $x, $y, ...
+	INT_DATA   = "INT_DATA"   // 1343456
 	INT_16DATA = "INT_16DATA" // 0xA0, 0xfff, ...
 	FLOAT_DATA = "FLOAT_DATA" // 1.1, 1e-3, 1e+3, ...
 	PROC_IDENT = "PROC_IDENT" // add, FuncName, ...
@@ -42,6 +42,8 @@ const (
 	RBRACE   = "}"
 	LBRACKET = "["
 	RBRACKET = "]"
+	LTENSOR  = "<<"
+	RTENSOR  = ">>"
 
 	// キーワード
 	GLOBAL = "GLOBAL"
