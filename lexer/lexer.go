@@ -100,8 +100,12 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
 		} else if isDigit(l.rune) {
-			tok.Type = token.INT_DATA
-			tok.Literal = l.readNumber()
+			if '0' == l.rune && 'x' == l.peekChar() {
+				tok.Type = token.INT_16DATA
+				tok.Literal = l.readHexadecimalNumber()
+			} else {
+				tok.Type, tok.Literal = l.readNumber()
+			}
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.rune)
@@ -129,12 +133,44 @@ func isIdentifier(r rune) bool {
 	return isLetter(r) || '0' <= r && r <= '9'
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readHexadecimalNumber() string {
+	position := l.position
+	l.readRune()  // 0
+	l.readRune()  // x
+	for isHexadecimalDigit(l.rune) {
+		l.readRune()
+	}
+	return string(l.input[position:l.position])
+}
+
+func isHexadecimalDigit(r rune) bool {
+	return '0' <= r && r <= '9' || 'a' <= r && r <= 'f' || 'A' <= r && r <= 'F'
+}
+
+func (l *Lexer) readNumber() (token.TokenType, string) {
+	var typ token.TokenType
+	typ = token.INT_DATA
 	position := l.position
 	for isDigit(l.rune) {
 		l.readRune()
 	}
-	return string(l.input[position:l.position])
+	if '.' == l.rune {
+		typ = token.FLOAT_DATA
+		l.readRune()
+		for isDigit(l.rune) {
+			l.readRune()
+		}
+	}
+	if 'e' == l.rune || 'E' == l.rune {
+		if '-' == l.peekChar() || '+' == l.peekChar() {
+			l.readRune()
+			l.readRune()
+			for isDigit(l.rune) {
+				l.readRune()
+			}
+		}
+	}
+	return typ, string(l.input[position:l.position])
 }
 
 func isDigit(r rune) bool {

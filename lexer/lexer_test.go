@@ -23,6 +23,14 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+
+int $int16 = 0x123;
+$int16 = 0xff;
+$int16 = 0xFF;
+
+float $float = 1.0;
+$float = 1.0e-3;
+$float = 1.0e+3;
 `
 
 	tests := []struct {
@@ -92,6 +100,32 @@ if (5 < 10) {
 		{token.INT_DATA, "10"},
 		{token.NOT_EQ, "!="},
 		{token.INT_DATA, "9"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "int"},
+		{token.IDENT, "$int16"},
+		{token.ASSIGN, "="},
+		{token.INT_16DATA, "0x123"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "$int16"},
+		{token.ASSIGN, "="},
+		{token.INT_16DATA, "0xff"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "$int16"},
+		{token.ASSIGN, "="},
+		{token.INT_16DATA, "0xFF"},
+		{token.SEMICOLON, ";"},
+		{token.FLOAT, "float"},
+		{token.IDENT, "$float"},
+		{token.ASSIGN, "="},
+		{token.FLOAT_DATA, "1.0"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "$float"},
+		{token.ASSIGN, "="},
+		{token.FLOAT_DATA, "1.0e-3"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "$float"},
+		{token.ASSIGN, "="},
+		{token.FLOAT_DATA, "1.0e+3"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
