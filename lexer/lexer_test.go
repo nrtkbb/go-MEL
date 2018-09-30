@@ -37,6 +37,8 @@ $float = .01;
 vector $vec = <<1, 2, 3.0>>;
 matrix $mat[1][2] = <<1, 2; 3.0, 4.0>>;
 string $str = "test \"test\"";
+
+getAttr -s "pCubeShape1.fc";
 `
 
 	tests := []struct {
@@ -171,6 +173,10 @@ string $str = "test \"test\"";
 		{token.Ident, "$str"},
 		{token.Assign, "="},
 		{token.StringData, "\"test \\\"test\\\"\""},
+		{token.Semicolon, ";"},
+		{token.ProcIdent, "getAttr"},
+		{token.Flag, "-s"},
+		{token.StringData, "\"pCubeShape1.fc\""},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}

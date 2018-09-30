@@ -74,6 +74,11 @@ func (l *Lexer) NextToken() token.Token {
 	case '+':
 		tok = newToken(token.Plus, l.rune)
 	case '-':
+		if 'a' <= l.peekRune() && l.peekRune() <= 'z' {
+			tok.Type = token.Flag
+			tok.Literal = l.readFlag()
+			return tok
+		}
 		tok = newToken(token.Minus, l.rune)
 	case '/':
 		tok = newToken(token.Slash, l.rune)
@@ -112,6 +117,15 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
+func (l *Lexer) readFlag() string {
+	position := l.position
+	l.readRune() // '-'
+	for isFlag(l.rune) {
+		l.readRune()
+	}
+	return string(l.input[position:l.position])
+}
+
 func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.Type) token.Token {
 	if peek == l.peekRune() {
 		ch := l.rune
@@ -142,6 +156,10 @@ func (l *Lexer) readIdentifier() string {
 		l.readRune()
 	}
 	return string(l.input[position:l.position])
+}
+
+func isFlag(r rune) bool {
+	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9'
 }
 
 func isLetter(r rune) bool {
