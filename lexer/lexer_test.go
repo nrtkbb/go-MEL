@@ -39,6 +39,7 @@ matrix $mat[1][2] = <<1, 2; 3.0, 4.0>>;
 string $str = "test \"test\"";
 
 getAttr -s "pCubeShape1.fc";
+string $ls[] = ` + "`ls -sl`" + `;
 `
 
 	tests := []struct {
@@ -177,6 +178,16 @@ getAttr -s "pCubeShape1.fc";
 		{token.ProcIdent, "getAttr"},
 		{token.Flag, "-s"},
 		{token.StringData, "\"pCubeShape1.fc\""},
+		{token.Semicolon, ";"},
+		{token.String, "string"},
+		{token.Ident, "$ls"},
+		{token.Lbracket, "["},
+		{token.Rbracket, "]"},
+		{token.Assign, "="},
+		{token.BackQuotes, "`"},
+		{token.ProcIdent, "ls"},
+		{token.Flag, "-sl"},
+		{token.BackQuotes, "`"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}

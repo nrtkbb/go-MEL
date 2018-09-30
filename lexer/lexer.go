@@ -77,6 +77,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.peekRuneCheck('>', token.Rtensor, token.Gt)
 	case ';':
 		tok = newToken(token.Semicolon, l.rune, l.row, l.column)
+	case '`':
+		tok = newToken(token.BackQuotes, l.rune, l.row, l.column)
 	case '(':
 		tok = newToken(token.Lparen, l.rune, l.row, l.column)
 	case ')':

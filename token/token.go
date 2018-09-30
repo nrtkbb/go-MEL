@@ -40,8 +40,9 @@ const (
 	NotEq = "!="
 
 	// デリミタ
-	Comma     = ","
-	Semicolon = ";"
+	Comma      = ","
+	Semicolon  = ";"
+	BackQuotes = "`"
 
 	Lparen   = "("
 	Rparen   = ")"
