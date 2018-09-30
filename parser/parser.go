@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nrtkbb/go-MEL/ast"
 	"github.com/nrtkbb/go-MEL/lexer"
 	"github.com/nrtkbb/go-MEL/token"
@@ -8,15 +10,24 @@ import (
 
 // Parser use Lexer and Token
 type Parser struct {
-	l *lexer.Lexer
+	l      *lexer.Lexer
+	errors []string
 
 	curToken  token.Token
 	peekToken token.Token
 }
 
+// Errors return parsing error strings..
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+
 // New make Parser instance.
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{
+		l:      l,
+		errors: []string{},
+	}
 
 	// Read two token. Set both curToken and peekToken.
 	p.nextToken()
@@ -89,5 +100,12 @@ func (p *Parser) expectPeek(t token.Type) bool {
 		p.nextToken()
 		return true
 	}
+	p.peekError(t)
 	return false
+}
+
+func (p *Parser) peekError(t token.Type) {
+	msg := fmt.Sprintf("line:%d.%d expected next token to be %s, got %s instead",
+		p.peekToken.Row, p.peekToken.Column, t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
 }

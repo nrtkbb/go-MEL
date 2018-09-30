@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/nrtkbb/go-MEL/ast"
 	"testing"
 
+	"github.com/nrtkbb/go-MEL/ast"
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
@@ -18,6 +18,8 @@ string $foobar = "foobar";
 	p := New(l)
 
 	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
@@ -26,7 +28,7 @@ string $foobar = "foobar";
 			len(program.Statements))
 	}
 
-	tests := []struct{
+	tests := []struct {
 		expectedIdentifier string
 	}{
 		{"$x"},
@@ -40,6 +42,19 @@ string $foobar = "foobar";
 			return
 		}
 	}
+}
+
+func checkParserErrors(t *testing.T, p *Parser) {
+	errors := p.Errors()
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("parser has %d errors", len(errors))
+	for _, msg := range errors {
+		t.Errorf("parser error: %q", msg)
+	}
+	t.FailNow()
 }
 
 func testStringStatement(t *testing.T, s ast.Statement, name string) bool {
