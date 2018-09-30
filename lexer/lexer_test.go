@@ -197,3 +197,52 @@ getAttr -s "pCubeShape1.fc";
 		}
 	}
 }
+
+func TestLineCount(t *testing.T) {
+	input := `int $five = 5;
+int $ten = 10;
+`
+
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+		expectedRow     int
+		expectedColumn  int
+	}{
+		{token.Int, "int", 1, 1},
+		{token.Ident, "$five", 1, 5},
+		{token.Assign, "=", 1, 11},
+		{token.IntData, "5", 1, 13},
+		{token.Semicolon, ";", 1, 14},
+		{token.Int, "int", 2, 1},
+		{token.Ident, "$ten", 2, 5},
+		{token.Assign, "=", 2, 10},
+		{token.IntData, "10", 2, 12},
+		{token.Semicolon, ";", 2, 14},
+	}
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+
+		if tok.Column != tt.expectedColumn {
+			t.Fatalf("tests[%d] - column wrong. expected=%q, got=%q",
+				i, tt.expectedColumn, tok.Column)
+		}
+
+		if tok.Row != tt.expectedRow {
+			t.Fatalf("tests[%d] - row wrong. expected=%q, got=%q",
+				i, tt.expectedRow, tok.Row)
+		}
+	}
+}

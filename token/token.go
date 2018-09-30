@@ -7,6 +7,8 @@ type Type string
 type Token struct {
 	Type    Type
 	Literal string
+	Row     int // 行数 1行はじまり
+	Column  int // 列数 1列はじまり
 }
 
 // Type strings.
