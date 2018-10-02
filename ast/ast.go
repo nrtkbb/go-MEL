@@ -1,10 +1,15 @@
 package ast
 
-import "github.com/nrtkbb/go-MEL/token"
+import (
+	"bytes"
+
+	"github.com/nrtkbb/go-MEL/token"
+)
 
 // Node is top of AST interface
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 // Statement have some expression
@@ -32,6 +37,17 @@ func (p *Program) TokenLiteral() string {
 	return ""
 }
 
+// String ...
+func (p *Program) String() string {
+	var out bytes.Buffer
+
+	for _, s := range p.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
 // StringStatement ...
 type StringStatement struct {
 	Token token.Token // token.String
@@ -44,6 +60,24 @@ func (ls *StringStatement) statementNode() {}
 // TokenLiteral ...
 func (ls *StringStatement) TokenLiteral() string {
 	return ls.Token.Literal
+}
+
+// String ...
+func (ls *StringStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ls.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(ls.Name.String())
+	out.WriteString(" = ")
+
+	if ls.Value != nil {
+		out.WriteString(ls.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
 }
 
 // Identifier is token.Ident
@@ -59,6 +93,11 @@ func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
 }
 
+// String ...
+func (i *Identifier) String() string {
+	return i.Value
+}
+
 // ReturnStatement ...
 type ReturnStatement struct {
 	Token       token.Token // token.Return
@@ -70,4 +109,41 @@ func (rs *ReturnStatement) statementNode() {}
 // TokenLiteral ...
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
+}
+
+// String ...
+func (rs *ReturnStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(rs.TokenLiteral())
+	out.WriteString(" ")
+
+	if rs.ReturnValue != nil {
+		out.WriteString(rs.ReturnValue.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+// ExpressionStatement ...
+type ExpressionStatement struct {
+	Token      token.Token // first token
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode() {}
+
+// TokenLiteral ...
+func (es *ExpressionStatement) TokenLiteral() string {
+	return es.Token.Literal
+}
+
+// String ...
+func (es *ExpressionStatement) String() string {
+	if es.Expression != nil {
+		return es.Expression.String()
+	}
+	return ""
 }
