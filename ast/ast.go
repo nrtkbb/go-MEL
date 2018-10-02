@@ -48,6 +48,53 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+// ExpressionStatement ...
+type ExpressionStatement struct {
+	Token      token.Token // first token
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode() {}
+
+// TokenLiteral ...
+func (es *ExpressionStatement) TokenLiteral() string {
+	return es.Token.Literal
+}
+
+// String ...
+func (es *ExpressionStatement) String() string {
+	if es.Expression != nil {
+		return es.Expression.String()
+	}
+	return ""
+}
+
+// PrefixExpression ...
+type PrefixExpression struct {
+	Token    token.Token // prefix token. ex) '-' or '!'
+	Operator string
+	Right    Expression
+}
+
+func (pe *PrefixExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+// String ...
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // StringStatement ...
 type StringStatement struct {
 	Token token.Token // token.String
@@ -125,27 +172,6 @@ func (rs *ReturnStatement) String() string {
 	out.WriteString(";")
 
 	return out.String()
-}
-
-// ExpressionStatement ...
-type ExpressionStatement struct {
-	Token      token.Token // first token
-	Expression Expression
-}
-
-func (es *ExpressionStatement) statementNode() {}
-
-// TokenLiteral ...
-func (es *ExpressionStatement) TokenLiteral() string {
-	return es.Token.Literal
-}
-
-// String ...
-func (es *ExpressionStatement) String() string {
-	if es.Expression != nil {
-		return es.Expression.String()
-	}
-	return ""
 }
 
 // IntegerLiteral ...
