@@ -8,14 +8,15 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+// precedence const
 const (
 	LOWEST      int = 1 + iota
-	EQUALS       // ==
-	LESSGREATER  // > or <
-	SUM          // +
-	PRODUCT      // *
-	PREFIX       // -X or !X
-	CALL         // myFunction(X
+	EQUALS          // ==
+	LESSGREATER     // > or <
+	SUM             // +
+	PRODUCT         // *
+	PREFIX          // -X or !X
+	CALL            // myFunction(X
 )
 
 // Parser use Lexer and Token
@@ -32,7 +33,7 @@ type Parser struct {
 
 type (
 	prefixParseFn func() ast.Expression
-	infixParseFn func(ast.Expression) ast.Expression
+	infixParseFn  func(ast.Expression) ast.Expression
 )
 
 // Errors return parsing error strings..

@@ -25,7 +25,6 @@ func TestIdentifierExpression(t *testing.T) {
 			program.Statements[0])
 	}
 
-
 	ident, ok := stmt.Expression.(*ast.Identifier)
 	if !ok {
 		t.Fatalf("exp not *ast.Identifier. got=%T", stmt.Expression)

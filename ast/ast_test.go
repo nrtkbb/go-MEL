@@ -1,8 +1,9 @@
 package ast
 
 import (
-	"github.com/nrtkbb/go-MEL/token"
 	"testing"
+
+	"github.com/nrtkbb/go-MEL/token"
 )
 
 func TestString(t *testing.T) {
