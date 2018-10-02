@@ -8,6 +8,16 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+const (
+	LOWEST      int = 1 + iota
+	EQUALS       // ==
+	LESSGREATER  // > or <
+	SUM          // +
+	PRODUCT      // *
+	PREFIX       // -X or !X
+	CALL         // myFunction(X
+)
+
 // Parser use Lexer and Token
 type Parser struct {
 	l      *lexer.Lexer
@@ -15,7 +25,15 @@ type Parser struct {
 
 	curToken  token.Token
 	peekToken token.Token
+
+	prefixParseFns map[token.Type]prefixParseFn
+	infixParseFns  map[token.Type]infixParseFn
 }
+
+type (
+	prefixParseFn func() ast.Expression
+	infixParseFn func(ast.Expression) ast.Expression
+)
 
 // Errors return parsing error strings..
 func (p *Parser) Errors() []string {
@@ -29,11 +47,19 @@ func New(l *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
+	// set parse func.
+	p.prefixParseFns = make(map[token.Type]prefixParseFn)
+	p.registerPrefix(token.Ident, p.parseIdentifier)
+
 	// Read two token. Set both curToken and peekToken.
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 func (p *Parser) nextToken() {
@@ -64,7 +90,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -102,6 +128,28 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	return stmt
 }
 
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+
+	return leftExp
+}
+
 func (p *Parser) curTokenIs(t token.Type) bool {
 	return p.curToken.Type == t
 }
@@ -123,4 +171,12 @@ func (p *Parser) peekError(t token.Type) {
 	msg := fmt.Sprintf("line:%d.%d expected next token to be %s, got %s instead",
 		p.peekToken.Row, p.peekToken.Column, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) registerPrefix(tokenType token.Type, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
