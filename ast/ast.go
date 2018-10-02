@@ -148,8 +148,9 @@ func (es *ExpressionStatement) String() string {
 	return ""
 }
 
+// IntegerLiteral ...
 type IntegerLiteral struct {
-	Token token.Token
+	Token token.Token // token.IntData
 	Value int64
 }
 
