@@ -54,28 +54,28 @@ const (
 	Rtensor  = ">>"
 
 	// For LookupIdent
-	Global = "Global"
-	Proc   = "Proc"
-	String = "String"
-	Int    = "Int"
-	Float  = "Float"
-	Vector = "Vector"
-	Matrix = "Matrix"
-	True   = "True"
-	False  = "False"
-	If     = "If"
-	Else   = "Else"
-	Return = "Return"
+	Global    = "Global"
+	Proc      = "Proc"
+	StringDec = "String"
+	IntDec    = "Int"
+	FloatDec  = "Float"
+	VectorDec = "Vector"
+	MatrixDec = "Matrix"
+	True      = "True"
+	False     = "False"
+	If        = "If"
+	Else      = "Else"
+	Return    = "Return"
 )
 
 var keywords = map[string]Type{
 	"global": Global,
 	"proc":   Proc,
-	"string": String,
-	"int":    Int,
-	"float":  Float,
-	"vector": Vector,
-	"matrix": Matrix,
+	"string": StringDec,
+	"int":    IntDec,
+	"float":  FloatDec,
+	"vector": VectorDec,
+	"matrix": MatrixDec,
 	"true":   True,
 	"false":  False,
 	"if":     If,

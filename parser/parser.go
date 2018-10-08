@@ -103,7 +103,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.String:
+	case token.StringDec:
 		return p.parseStringStatement()
 	case token.Return:
 		return p.parseReturnStatement()

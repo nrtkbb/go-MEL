@@ -127,7 +127,7 @@ func (pe *PrefixExpression) String() string {
 
 // StringStatement ...
 type StringStatement struct {
-	Token token.Token // token.String
+	Token token.Token // token.StringDec
 	Name  *Identifier
 	Value Expression
 }
