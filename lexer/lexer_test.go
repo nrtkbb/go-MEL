@@ -6,6 +6,36 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestCommentToken(t *testing.T) {
+	input := `
+// test
+/* test */
+`
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.Comment, " test"},
+		{token.Comment, " test "},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestNextToken(t *testing.T) {
 	input := `int $five = 5;
 int $ten = 10;
@@ -13,7 +43,7 @@ int $ten = 10;
 global proc add ( int $x, int $y ) {
 	return $x + $y;
 }
-!-/*5;
+!-/ *5;
 5 < 10 > 5;
 
 if (5 < 10) {

@@ -105,6 +105,19 @@ func (l *Lexer) NextToken() token.Token {
 		}
 		tok = newToken(token.Minus, l.rune, l.row, l.column)
 	case '/':
+		if '/' == l.peekRune() {
+			tok.Row = l.row
+			tok.Column = l.column
+			tok.Type = token.Comment
+			tok.Literal = l.readLineComment()
+			return tok
+		} else if '*' == l.peekRune() {
+			tok.Row = l.row
+			tok.Column = l.column
+			tok.Type = token.Comment
+			tok.Literal = l.readComment()
+			return tok
+		}
 		tok = newToken(token.Slash, l.rune, l.row, l.column)
 	case '*':
 		tok = newToken(token.Asterisk, l.rune, l.row, l.column)
@@ -151,6 +164,35 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.readRune()
 	return tok
+}
+
+func (l *Lexer) readLineComment() string {
+	l.readRune() // '/'
+	l.readRune() // ?
+	position := l.position
+	for !isNewLine(l.rune) {
+		l.readRune()
+	}
+	return string(l.input[position:l.position])
+}
+
+func (l *Lexer) readComment() string {
+	l.readRune() // '*'
+	l.readRune() // ?
+	position := l.position
+	for !('*' == l.rune && '/' == l.peekRune()) {
+		l.readRune()
+		if l.position == len(l.input) {
+			break
+		}
+	}
+	comment := string(l.input[position:l.position])
+	l.readRune() // '/'
+	return comment
+}
+
+func isNewLine(r rune) bool {
+	return '\n' == r || '\r' == r
 }
 
 func (l *Lexer) readFlag() string {
