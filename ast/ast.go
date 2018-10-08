@@ -206,7 +206,7 @@ func (rs *ReturnStatement) String() string {
 
 // IntegerLiteral ...
 type IntegerLiteral struct {
-	Token token.Token // token.IntData
+	Token token.Token // token.Int
 	Value int64
 }
 

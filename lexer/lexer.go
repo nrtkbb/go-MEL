@@ -115,7 +115,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = l.readIdentifier()
 		return tok
 	case '"':
-		tok.Type = token.StringData
+		tok.Type = token.String
 		tok.Row = l.row
 		tok.Column = l.column
 		tok.Literal = l.readString()
@@ -134,7 +134,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		} else if isDigit(l.rune) || '.' == l.rune && isDigit(l.peekRune()) {
 			if '0' == l.rune && 'x' == l.peekRune() {
-				tok.Type = token.Int16Data
+				tok.Type = token.Int16
 				tok.Row = l.row
 				tok.Column = l.column
 				tok.Literal = l.readHexadecimalNumber()
@@ -229,13 +229,13 @@ func isHexadecimalDigit(r rune) bool {
 
 func (l *Lexer) readNumber() (token.Type, string) {
 	var typ token.Type
-	typ = token.IntData
+	typ = token.Int
 	position := l.position
 	for isDigit(l.rune) {
 		l.readRune()
 	}
 	if '.' == l.rune {
-		typ = token.FloatData
+		typ = token.Float
 		l.readRune()
 		for isDigit(l.rune) {
 			l.readRune()
