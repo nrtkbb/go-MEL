@@ -75,6 +75,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.peekRuneCheck('<', token.Ltensor, token.Lt)
 	case '>':
 		tok = l.peekRuneCheck('>', token.Rtensor, token.Gt)
+	case '+':
+		tok = l.peekRuneCheck('+', token.Increment, token.Plus)
 	case ';':
 		tok = newToken(token.Semicolon, l.rune, l.row, l.column)
 	case '`':
@@ -93,8 +95,6 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Rbracket, l.rune, l.row, l.column)
 	case ',':
 		tok = newToken(token.Comma, l.rune, l.row, l.column)
-	case '+':
-		tok = newToken(token.Plus, l.rune, l.row, l.column)
 	case '-':
 		if 'a' <= l.peekRune() && l.peekRune() <= 'z' {
 			tok.Type = token.Flag
@@ -103,7 +103,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = l.readFlag()
 			return tok
 		}
-		tok = newToken(token.Minus, l.rune, l.row, l.column)
+		tok = l.peekRuneCheck('-', token.Decrement, token.Minus)
 	case '/':
 		if '/' == l.peekRune() {
 			tok.Row = l.row

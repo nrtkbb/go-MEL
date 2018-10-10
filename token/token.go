@@ -38,8 +38,10 @@ const (
 	Lt = "<"
 	Gt = ">"
 
-	Eq    = "=="
-	NotEq = "!="
+	Eq        = "=="
+	NotEq     = "!="
+	Increment = "++"
+	Decrement = "--"
 
 	// デリミタ
 	Comma      = ","

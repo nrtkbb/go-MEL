@@ -6,6 +6,54 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestIncrementDecrement(t *testing.T) {
+	input := `
+int $i = 0;
+--$i;
+$i--;
+++$i;
+$i++;
+`
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.IntDec, "int"},
+		{token.Ident, "$i"},
+		{token.Assign, "="},
+		{token.Int, "0"},
+		{token.Semicolon, ";"},
+		{token.Decrement, "--"},
+		{token.Ident, "$i"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$i"},
+		{token.Decrement, "--"},
+		{token.Semicolon, ";"},
+		{token.Increment, "++"},
+		{token.Ident, "$i"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$i"},
+		{token.Increment, "++"},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestCommentToken(t *testing.T) {
 	input := `
 // test
