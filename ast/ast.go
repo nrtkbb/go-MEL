@@ -125,6 +125,32 @@ func (pe *PrefixExpression) String() string {
 	return out.String()
 }
 
+// PostfixExpression ...
+type PostfixExpression struct {
+	Token    token.Token // postfix token. ex) '--' or '++'
+	Operator string
+	Left     Expression
+}
+
+func (pe *PostfixExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (pe *PostfixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+// String ...
+func (pe *PostfixExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Left.String())
+	out.WriteString(pe.Operator)
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // StringStatement ...
 type StringStatement struct {
 	Token token.Token // token.StringDec
