@@ -8,6 +8,27 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestTernaryOperatorParsing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"1 < 2 ? 1 : 2", "((1 < 2) ? 1 : 2)"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		actual := program.String()
+		if actual != tt.expected {
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
+		}
+	}
+}
+
 func TestPostfixParsing(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -31,7 +52,7 @@ func TestPostfixParsing(t *testing.T) {
 
 		actual := program.String()
 		if actual != tt.expected {
-			// t.Errorf("expected=%q, got=%q", tt.expected, actual)
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
 		}
 	}
 }

@@ -12,6 +12,7 @@ import (
 // precedence const
 const (
 	LOWEST      int = 1 + iota
+	TERNARY         // ? and :
 	EQUALS          // ==
 	LESSGREATER     // > or <
 	SUM             // +
@@ -32,12 +33,15 @@ var precedences = map[token.Type]int{
 	token.Asterisk:  PRODUCT,
 	token.Increment: CREMENT,
 	token.Decrement: CREMENT,
+	token.Question:  TERNARY,
+	token.Coron:     TERNARY,
 }
 
 type (
 	prefixParseFn  func() ast.Expression
 	infixParseFn   func(ast.Expression) ast.Expression
 	postfixParseFn func(ast.Expression) ast.Expression
+	ternaryParseFn func()
 )
 
 // Parser use Lexer and Token
