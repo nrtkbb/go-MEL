@@ -16,8 +16,8 @@ const (
 	LESSGREATER     // > or <
 	SUM             // +
 	PRODUCT         // *
-	POSTFIX         // X++ or X--
 	PREFIX          // -X or !X
+	CREMENT         // X++ or X--
 	CALL            // myFunction(X
 )
 
@@ -30,8 +30,8 @@ var precedences = map[token.Type]int{
 	token.Minus:     SUM,
 	token.Slash:     PRODUCT,
 	token.Asterisk:  PRODUCT,
-	token.Increment: PREFIX,
-	token.Decrement: PREFIX,
+	token.Increment: CREMENT,
+	token.Decrement: CREMENT,
 }
 
 type (

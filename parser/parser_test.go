@@ -20,6 +20,7 @@ func TestPostfixParsing(t *testing.T) {
 		{"$i++ + $a", "(($i++) + $a)"},
 		{"$i++ * $a", "(($i++) * $a)"},
 		{"-$i++ * $a", "(((-$i)++) * $a)"},
+		{"$i++ + $a * $b", "(($i++) + ($a * $b))"},
 	}
 
 	for _, tt := range tests {
