@@ -41,7 +41,7 @@ type (
 	prefixParseFn  func() ast.Expression
 	infixParseFn   func(ast.Expression) ast.Expression
 	postfixParseFn func(ast.Expression) ast.Expression
-	ternaryParseFn func()
+	ternaryParseFn func(ast.Expression) ast.Expression
 )
 
 // Parser use Lexer and Token
@@ -55,6 +55,7 @@ type Parser struct {
 	prefixParseFns  map[token.Type]prefixParseFn
 	infixParseFns   map[token.Type]infixParseFn
 	postfixParseFns map[token.Type]postfixParseFn
+	ternaryParseFns map[token.Type]ternaryParseFn
 }
 
 // Errors return parsing error strings..
@@ -93,6 +94,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.postfixParseFns = make(map[token.Type]postfixParseFn)
 	p.registerPostfix(token.Increment, p.parsePostfixExpression)
 	p.registerPostfix(token.Decrement, p.parsePostfixExpression)
+
+	// set ternary parse func.
+	p.ternaryParseFns = make(map[token.Type]ternaryParseFn)
+	p.registerTernary(token.Question, p.parseTernaryExpression)
 
 	// Read two token. Set both curToken and peekToken.
 	p.nextToken()
@@ -149,6 +154,11 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	leftExp := prefix()
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() {
+		ternary := p.ternaryParseFns[p.peekToken.Type]
+		if ternary != nil {
+			leftExp = ternary(leftExp)
+		}
+
 		postfix := p.postfixParseFns[p.peekToken.Type]
 		if postfix != nil {
 			leftExp = postfix(leftExp)
@@ -201,6 +211,30 @@ func (p *Parser) parsePostfixExpression(left ast.Expression) ast.Expression {
 		Operator: p.curToken.Literal,
 		Left:     left,
 	}
+
+	return expression
+}
+
+func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expression {
+	p.nextToken()
+
+	expression := &ast.TernaryExpression{
+		Conditional: conditional,
+		Token1:      p.curToken,
+		Operator1:   p.curToken.Literal,
+	}
+	precedences := p.curPrecedence()
+
+	p.nextToken()
+	expression.TrueExp = p.parseExpression(precedences)
+	p.nextToken()
+
+	expression.Token2 = p.curToken
+	expression.Operator2 = p.curToken.Literal
+	precedences = p.curPrecedence()
+
+	p.nextToken()
+	expression.FalseExp = p.parseExpression(precedences)
 
 	return expression
 }
@@ -296,6 +330,10 @@ func (p *Parser) registerInfix(tokenType token.Type, fn infixParseFn) {
 
 func (p *Parser) registerPostfix(tokenType token.Type, fn postfixParseFn) {
 	p.postfixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerTernary(tokenType token.Type, fn ternaryParseFn) {
+	p.ternaryParseFns[tokenType] = fn
 }
 
 func (p *Parser) noPrefixParseFnError(t token.Type) {
