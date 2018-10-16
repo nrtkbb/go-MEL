@@ -38,6 +38,9 @@ const (
 	Lt = "<"
 	Gt = ">"
 
+	Question = "?"
+	Coron    = ":"
+
 	Eq        = "=="
 	NotEq     = "!="
 	Increment = "++"

@@ -6,6 +6,56 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestTernaryOperator(t *testing.T) {
+	input := `
+int $a = 1;
+int $b = 2;
+int $c = $a < $b ? 10 : 20;
+`
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.IntDec, "int"},
+		{token.Ident, "$a"},
+		{token.Assign, "="},
+		{token.Int, "1"},
+		{token.Semicolon, ";"},
+		{token.IntDec, "int"},
+		{token.Ident, "$b"},
+		{token.Assign, "="},
+		{token.Int, "2"},
+		{token.Semicolon, ";"},
+		{token.IntDec, "int"},
+		{token.Ident, "$c"},
+		{token.Assign, "="},
+		{token.Ident, "$a"},
+		{token.Lt, "<"},
+		{token.Ident, "$b"},
+		{token.Question, "?"},
+		{token.Int, "10"},
+		{token.Coron, ":"},
+		{token.Int, "20"},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestIncrementDecrement(t *testing.T) {
 	input := `
 int $i = 0;
