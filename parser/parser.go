@@ -16,8 +16,8 @@ const (
 	LESSGREATER     // > or <
 	SUM             // +
 	PRODUCT         // *
-	PREFIX          // -X or !X
 	CREMENT         // X++ or X--
+	PREFIX          // -X or !X
 	CALL            // myFunction(X
 )
 
