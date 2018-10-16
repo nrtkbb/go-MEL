@@ -151,6 +151,39 @@ func (pe *PostfixExpression) String() string {
 	return out.String()
 }
 
+// TernaryExpression ...
+type TernaryExpression struct {
+	Conditional Expression
+	Token1      token.Token // '?'
+	Operator1   string      // "?"
+	TrueExp     Expression
+	Token2      token.Token // ':'
+	Operator2   string      // ":"
+	FalseExp    Expression
+}
+
+func (te *TernaryExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (te *TernaryExpression) TokenLiteral() string {
+	return te.Token1.Literal
+}
+
+// String ...
+func (te *TernaryExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(te.Conditional.String())
+	out.WriteString(" " + te.Operator1 + " ")
+	out.WriteString(te.TrueExp.String())
+	out.WriteString(" " + te.Operator2 + " ")
+	out.WriteString(te.FalseExp.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // StringStatement ...
 type StringStatement struct {
 	Token token.Token // token.StringDec
