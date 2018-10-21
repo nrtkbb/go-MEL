@@ -104,6 +104,37 @@ $i++;
 	}
 }
 
+func TestStringLiteralToken(t *testing.T) {
+	input := `
+"s" + "s";
+`
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.String, "\"s\""},
+		{token.Plus, "+"},
+		{token.String, "\"s\""},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestCommentToken(t *testing.T) {
 	input := `
 // test

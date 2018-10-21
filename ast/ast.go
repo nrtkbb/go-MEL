@@ -280,3 +280,21 @@ func (il *IntegerLiteral) TokenLiteral() string {
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
+
+// StringLiteral ...
+type StringLiteral struct {
+	Token token.Token // token.String
+	Value string
+}
+
+func (sl *StringLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (sl *StringLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+
+// String ...
+func (sl *StringLiteral) String() string {
+	return sl.Token.Literal
+}
