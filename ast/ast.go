@@ -298,3 +298,21 @@ func (sl *StringLiteral) TokenLiteral() string {
 func (sl *StringLiteral) String() string {
 	return sl.Token.Literal
 }
+
+// Boolean ...
+type Boolean struct {
+	Token token.Token // true or false
+	Value bool
+}
+
+func (b *Boolean) expressionNode() {}
+
+// TokenLiteral ...
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+// String ...
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}

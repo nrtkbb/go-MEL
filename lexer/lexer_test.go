@@ -6,6 +6,51 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestBooleanToken(t *testing.T) {
+	input := `
+true;
+false;
+bool $t = true;
+bool $f = false;
+`
+
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.True, "true"},
+		{token.Semicolon, ";"},
+		{token.False, "false"},
+		{token.Semicolon, ";"},
+		{token.BoolDec, "bool"},
+		{token.Ident, "$t"},
+		{token.Assign, "="},
+		{token.True, "true"},
+		{token.Semicolon, ";"},
+		{token.BoolDec, "bool"},
+		{token.Ident, "$f"},
+		{token.Assign, "="},
+		{token.False, "false"},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestTernaryOperator(t *testing.T) {
 	input := `
 int $a = 1;

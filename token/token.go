@@ -68,8 +68,9 @@ const (
 	FloatDec  = "FloatDec"
 	VectorDec = "VectorDec"
 	MatrixDec = "MatrixDec"
-	True      = "TrueDec"
-	False     = "FalseDec"
+	BoolDec   = "BoolDec"
+	True      = "True"
+	False     = "False"
 	If        = "If"
 	Else      = "Else"
 	Return    = "Return"
@@ -85,6 +86,7 @@ var keywords = map[string]Type{
 	"matrix": MatrixDec,
 	"true":   True,
 	"false":  False,
+	"bool":   BoolDec,
 	"if":     If,
 	"else":   Else,
 	"return": Return,
