@@ -24,6 +24,8 @@ const (
 	Float     = "Float"     // 1.1, 1e-3, 1e+3, ...
 	String    = "String"    // "node.attr", ...
 	Flag      = "Flag"      // -size, -s, ...
+	True      = "True"
+	False     = "False"
 
 	Comment = "Comment" // // ...
 
@@ -69,8 +71,6 @@ const (
 	VectorDec = "VectorDec"
 	MatrixDec = "MatrixDec"
 	BoolDec   = "BoolDec"
-	True      = "True"
-	False     = "False"
 	If        = "If"
 	Else      = "Else"
 	Return    = "Return"
