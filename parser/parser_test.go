@@ -8,6 +8,30 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestOperatorPrecendenceParsing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"1 * (2 + 3)", "(1 * (2 + 3))"},
+		{"(1 + 2) * 3", "((1 + 2) * 3)"},
+		{"-(1 + 2)", "(-(1 + 2))"},
+		{"!(true == true)", "(!(true == true))"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		actual := program.String()
+		if actual != tt.expected {
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
+		}
+	}
+}
+
 func TestTernaryOperatorParsing(t *testing.T) {
 	tests := []struct {
 		input    string
