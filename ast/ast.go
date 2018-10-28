@@ -185,26 +185,37 @@ func (te *TernaryExpression) String() string {
 	return out.String()
 }
 
-// ReturnType ...
-type ReturnType struct {
+// TypeDeclaration ...
+type TypeDeclaration struct {
 	Token   token.Token // string or int or float or matrix or vector
 	IsArray bool
 }
 
-// String ...
-func (rt *ReturnType) String() string {
-	if rt.IsArray {
-		return rt.Token.Literal + "[]"
-	} else {
-		return rt.Token.Literal
+func (td *TypeDeclaration) expressionNode() {}
+
+// TokenLiteral ...
+func (td *TypeDeclaration) TokenLiteral() string {
+	if td.IsArray {
+		return td.Token.Literal + "[]"
 	}
+	return td.Token.Literal
+}
+
+// String ...
+func (td *TypeDeclaration) String() string {
+	if td.IsArray {
+		return td.Token.Literal + "[]"
+	}
+	return td.Token.Literal
 }
 
 // FunctionLiteral ...
 type FunctionLiteral struct {
 	Token      token.Token // proc
+	Name       token.Token // ProcIdent
 	IsGlobal   bool
-	ReturnType *ReturnType
+	ReturnType *TypeDeclaration
+	ParamTypes []*TypeDeclaration
 	Parameters []*Identifier
 	Body       *BlockStatement
 }

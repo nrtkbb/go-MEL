@@ -8,6 +8,60 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestFunctionLiteralParsing(t *testing.T) {
+	input := `
+proc Proc(string $x, string $y) {
+	$x + $y;
+}`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements, got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	function, ok := stmt.Expression.(*ast.FunctionLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.FunctionLiteral. got=%T\n",
+			stmt.Expression)
+	}
+
+	if function.Name.Literal != "Proc" {
+		t.Fatalf("function name is not %s. got=%s\n",
+			"Proc", function.Name.Literal)
+	}
+
+	if len(function.Parameters) != 2 {
+		t.Fatalf("function literal parameters wrong, want 2, got=%d\n",
+			len(function.Parameters))
+	}
+
+	testLiteralExpression(t, function.Parameters[0], "$x")
+	testLiteralExpression(t, function.Parameters[1], "$y")
+
+	if len(function.Body.Statements) != 1 {
+		t.Fatalf("function.Body.Statements has not 1 statements. got=%d\n",
+			len(function.Body.Statements))
+	}
+
+	bodyStmt, ok := function.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("function body stmt is not ast.ExressionStatement. got=%T\n",
+			function.Body.Statements[0])
+	}
+
+	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
+}
+
 func TestIfExpressionSingleBlock(t *testing.T) {
 	input := `if ($x < $y) string $x = "x";`
 

@@ -83,6 +83,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.False, p.parseBoolean)
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
 
 	// set infix parse func.
 	p.infixParseFns = make(map[token.Type]infixParseFn)
@@ -288,6 +289,95 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+	lit := &ast.FunctionLiteral{Token: p.curToken}
+
+	lit.ReturnType = p.parseTypeDeclaration()
+
+	if p.peekTokenIs(token.ProcIdent) {
+		p.nextToken()
+		lit.Name = p.curToken
+	} else {
+		return nil
+	}
+
+	if !p.expectPeek(token.Lparen) {
+		return nil
+	}
+
+	lit.ParamTypes, lit.Parameters = p.parseFunctionParameters()
+
+	if !p.expectPeek(token.Lbrace) {
+		return nil
+	}
+
+	lit.Body = p.parseBlockStatement()
+
+	return lit
+}
+
+func (p *Parser) parseFunctionParameters() ([]*ast.TypeDeclaration, []*ast.Identifier) {
+	var typeDeclarations []*ast.TypeDeclaration
+	var identifiers []*ast.Identifier
+
+	if p.peekTokenIs(token.Rparen) {
+		p.nextToken()
+		return typeDeclarations, identifiers
+	}
+
+	typeDeclaration := p.parseTypeDeclaration()
+	typeDeclarations = append(typeDeclarations, typeDeclaration)
+	p.nextToken()
+	identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	identifiers = append(identifiers, identifier)
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		typeDeclaration := p.parseTypeDeclaration()
+		typeDeclarations = append(typeDeclarations, typeDeclaration)
+		p.nextToken()
+		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		identifiers = append(identifiers, identifier)
+	}
+
+	if !p.expectPeek(token.Rparen) {
+		return nil, nil
+	}
+
+	return typeDeclarations, identifiers
+}
+
+func (p *Parser) parseTypeDeclaration() *ast.TypeDeclaration {
+	switch p.peekToken.Type {
+	case token.StringDec:
+		fallthrough
+	case token.FloatDec:
+		fallthrough
+	case token.VectorDec:
+		fallthrough
+	case token.IntDec:
+		p.nextToken()
+		td := &ast.TypeDeclaration{Token: p.curToken}
+		if p.peekTokenIs(token.Lbracket) {
+			p.nextToken()
+			if p.peekTokenIs(token.Rbracket) {
+				p.nextToken()
+				td.IsArray = true
+			} else {
+				return nil
+			}
+		} else {
+			return nil
+		}
+		return td
+	case token.MatrixDec:
+		p.nextToken()
+		td := &ast.TypeDeclaration{Token: p.curToken}
+		return td
+	}
+	return nil
 }
 
 func (p *Parser) parseIfExpression() ast.Expression {
