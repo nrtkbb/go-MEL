@@ -305,6 +305,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	if !p.expectPeek(token.Lbrace) {
+		// TODO: token.Lbrace がない場合は1つのStatementだけパースするようにする
 		return nil
 	}
 
@@ -314,6 +315,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		p.nextToken()
 
 		if !p.expectPeek(token.Lbrace) {
+			// TODO: token.Lbrace がない場合は1つのStatementだけパースするようにする
 			return nil
 		}
 
