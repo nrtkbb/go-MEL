@@ -304,22 +304,24 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	if !p.expectPeek(token.Lbrace) {
-		// TODO: token.Lbrace がない場合は1つのStatementだけパースするようにする
-		return nil
+	if p.peekTokenIs(token.Lbrace) {
+		p.nextToken()
+		expression.Consequence = p.parseBlockStatement()
+	} else {
+		p.nextToken()
+		expression.Consequence = p.parseSingleBlockStatement()
 	}
-
-	expression.Consequence = p.parseBlockStatement()
 
 	if p.peekTokenIs(token.Else) {
 		p.nextToken()
 
-		if !p.expectPeek(token.Lbrace) {
-			// TODO: token.Lbrace がない場合は1つのStatementだけパースするようにする
-			return nil
+		if p.peekTokenIs(token.Lbrace) {
+			p.nextToken()
+			expression.Alternative = p.parseBlockStatement()
+		} else {
+			p.nextToken()
+			expression.Alternative = p.parseSingleBlockStatement()
 		}
-
-		expression.Alternative = p.parseBlockStatement()
 	}
 
 	return expression
@@ -337,6 +339,23 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 			block.Statements = append(block.Statements, stmt)
 		}
 		p.nextToken()
+	}
+
+	return block
+}
+
+func (p *Parser) parseSingleBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: token.Token{
+		Type:    token.Lbrace,
+		Literal: "{",
+		Row:     p.curToken.Row,
+		Column:  p.curToken.Column,
+	}}
+	block.Statements = []ast.Statement{}
+
+	stmt := p.parseStatement()
+	if stmt != nil {
+		block.Statements = append(block.Statements, stmt)
 	}
 
 	return block
