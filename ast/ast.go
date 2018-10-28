@@ -169,6 +169,63 @@ func (te *TernaryExpression) TokenLiteral() string {
 	return te.Token1.Literal
 }
 
+// IfExpression ...
+type IfExpression struct {
+	Token       token.Token // if
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IfExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+// String ...
+func (ie *IfExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ie.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString(" else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String()
+}
+
+// BlockStatement ...
+type BlockStatement struct {
+	Token      token.Token // '{' token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode() {}
+
+// TokenLiteral ...
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+// String ...
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
 // String ...
 func (te *TernaryExpression) String() string {
 	var out bytes.Buffer
