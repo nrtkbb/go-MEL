@@ -9,7 +9,6 @@ env:
 
 go:
   - "1.11"
-  - master
 
 install:
  - go get -u golang.org/x/tools/cmd/goimports
