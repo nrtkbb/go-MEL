@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/nrtkbb/go-MEL/token"
 )
@@ -169,6 +170,79 @@ func (te *TernaryExpression) TokenLiteral() string {
 	return te.Token1.Literal
 }
 
+// String ...
+func (te *TernaryExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(te.Conditional.String())
+	out.WriteString(" " + te.Operator1 + " ")
+	out.WriteString(te.TrueExp.String())
+	out.WriteString(" " + te.Operator2 + " ")
+	out.WriteString(te.FalseExp.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+// ReturnType ...
+type ReturnType struct {
+	Token   token.Token // string or int or float or matrix or vector
+	IsArray bool
+}
+
+// String ...
+func (rt *ReturnType) String() string {
+	if rt.IsArray {
+		return rt.Token.Literal + "[]"
+	} else {
+		return rt.Token.Literal
+	}
+}
+
+// FunctionLiteral ...
+type FunctionLiteral struct {
+	Token      token.Token // proc
+	IsGlobal   bool
+	ReturnType *ReturnType
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fl *FunctionLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+// String ...
+func (fl *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	if fl.IsGlobal {
+		out.WriteString("global ")
+	}
+
+	out.WriteString(fl.TokenLiteral() + " ")
+
+	if fl.ReturnType != nil {
+		out.WriteString(fl.ReturnType.String() + " ")
+	}
+
+	var params []string
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
 // IfExpression ...
 type IfExpression struct {
 	Token       token.Token // if
@@ -222,21 +296,6 @@ func (bs *BlockStatement) String() string {
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
-
-	return out.String()
-}
-
-// String ...
-func (te *TernaryExpression) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("(")
-	out.WriteString(te.Conditional.String())
-	out.WriteString(" " + te.Operator1 + " ")
-	out.WriteString(te.TrueExp.String())
-	out.WriteString(" " + te.Operator2 + " ")
-	out.WriteString(te.FalseExp.String())
-	out.WriteString(")")
 
 	return out.String()
 }
