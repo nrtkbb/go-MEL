@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/nrtkbb/go-MEL/token"
 )
@@ -169,6 +170,90 @@ func (te *TernaryExpression) TokenLiteral() string {
 	return te.Token1.Literal
 }
 
+// String ...
+func (te *TernaryExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(te.Conditional.String())
+	out.WriteString(" " + te.Operator1 + " ")
+	out.WriteString(te.TrueExp.String())
+	out.WriteString(" " + te.Operator2 + " ")
+	out.WriteString(te.FalseExp.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+// TypeDeclaration ...
+type TypeDeclaration struct {
+	Token   token.Token // string or int or float or matrix or vector
+	IsArray bool
+}
+
+func (td *TypeDeclaration) expressionNode() {}
+
+// TokenLiteral ...
+func (td *TypeDeclaration) TokenLiteral() string {
+	if td.IsArray {
+		return td.Token.Literal + "[]"
+	}
+	return td.Token.Literal
+}
+
+// String ...
+func (td *TypeDeclaration) String() string {
+	if td.IsArray {
+		return td.Token.Literal + "[]"
+	}
+	return td.Token.Literal
+}
+
+// FunctionLiteral ...
+type FunctionLiteral struct {
+	Token      token.Token // proc
+	Name       token.Token // ProcIdent
+	IsGlobal   bool
+	ReturnType *TypeDeclaration
+	ParamTypes []*TypeDeclaration
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fl *FunctionLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+// String ...
+func (fl *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	if fl.IsGlobal {
+		out.WriteString("global ")
+	}
+
+	out.WriteString(fl.TokenLiteral() + " ")
+
+	if fl.ReturnType != nil {
+		out.WriteString(fl.ReturnType.String() + " ")
+	}
+
+	var params []string
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
 // IfExpression ...
 type IfExpression struct {
 	Token       token.Token // if
@@ -222,21 +307,6 @@ func (bs *BlockStatement) String() string {
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
-
-	return out.String()
-}
-
-// String ...
-func (te *TernaryExpression) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("(")
-	out.WriteString(te.Conditional.String())
-	out.WriteString(" " + te.Operator1 + " ")
-	out.WriteString(te.TrueExp.String())
-	out.WriteString(" " + te.Operator2 + " ")
-	out.WriteString(te.FalseExp.String())
-	out.WriteString(")")
 
 	return out.String()
 }
