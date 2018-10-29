@@ -25,7 +25,9 @@ const (
 	String    = "String"    // "node.attr", ...
 	Flag      = "Flag"      // -size, -s, ...
 	True      = "True"
+	On        = "On"
 	False     = "False"
+	Off       = "Off"
 
 	Comment = "Comment" // // ...
 
@@ -86,6 +88,8 @@ var keywords = map[string]Type{
 	"matrix": MatrixDec,
 	"true":   True,
 	"false":  False,
+	"on":     On,
+	"off":    Off,
 	"bool":   BoolDec,
 	"if":     If,
 	"else":   Else,

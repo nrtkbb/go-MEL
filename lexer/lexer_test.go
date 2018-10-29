@@ -10,6 +10,8 @@ func TestBooleanToken(t *testing.T) {
 	input := `
 true;
 false;
+on;
+off;
 bool $t = true;
 bool $f = false;
 `
@@ -21,6 +23,10 @@ bool $f = false;
 		{token.True, "true"},
 		{token.Semicolon, ";"},
 		{token.False, "false"},
+		{token.Semicolon, ";"},
+		{token.On, "on"},
+		{token.Semicolon, ";"},
+		{token.Off, "off"},
 		{token.Semicolon, ";"},
 		{token.BoolDec, "bool"},
 		{token.Ident, "$t"},
