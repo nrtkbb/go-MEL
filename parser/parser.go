@@ -35,6 +35,7 @@ var precedences = map[token.Type]int{
 	token.Decrement: CREMENT,
 	token.Question:  TERNARY,
 	token.Coron:     TERNARY,
+	token.Lparen:    CALL,
 }
 
 type (
@@ -73,6 +74,7 @@ func New(l *lexer.Lexer) *Parser {
 	// set prefix parse func.
 	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.Ident, p.parseIdentifier)
+	p.registerPrefix(token.ProcIdent, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
 	p.registerPrefix(token.String, p.parseStringLIteral)
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
@@ -95,6 +97,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NotEq, p.parseInfixExpression)
 	p.registerInfix(token.Lt, p.parseInfixExpression)
 	p.registerInfix(token.Gt, p.parseInfixExpression)
+	p.registerInfix(token.Lparen, p.parseCallExpression)
 
 	// set postfix parse func.
 	p.postfixParseFns = make(map[token.Type]postfixParseFn)
@@ -243,6 +246,36 @@ func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expressi
 	expression.FalseExp = p.parseExpression(precedences)
 
 	return expression
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	var args []ast.Expression
+
+	if p.peekTokenIs(token.Rparen) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.Rparen) {
+		return nil
+	}
+
+	return args
 }
 
 func (p *Parser) parseStringStatement() ast.Statement {
