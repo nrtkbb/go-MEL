@@ -23,19 +23,20 @@ const (
 )
 
 var precedences = map[token.Type]int{
-	token.Eq:        EQUALS,
-	token.NotEq:     EQUALS,
-	token.Lt:        LESSGREATER,
-	token.Gt:        LESSGREATER,
-	token.Plus:      SUM,
-	token.Minus:     SUM,
-	token.Slash:     PRODUCT,
-	token.Asterisk:  PRODUCT,
-	token.Increment: CREMENT,
-	token.Decrement: CREMENT,
-	token.Question:  TERNARY,
-	token.Coron:     TERNARY,
-	token.Lparen:    CALL,
+	token.Eq:         EQUALS,
+	token.NotEq:      EQUALS,
+	token.Lt:         LESSGREATER,
+	token.Gt:         LESSGREATER,
+	token.Plus:       SUM,
+	token.Minus:      SUM,
+	token.Slash:      PRODUCT,
+	token.Asterisk:   PRODUCT,
+	token.Increment:  CREMENT,
+	token.Decrement:  CREMENT,
+	token.Question:   TERNARY,
+	token.Coron:      TERNARY,
+	token.Lparen:     CALL,
+	token.BackQuotes: CALL,
 }
 
 type (
@@ -53,10 +54,13 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
+	// Function Style
 	prefixParseFns  map[token.Type]prefixParseFn
 	infixParseFns   map[token.Type]infixParseFn
 	postfixParseFns map[token.Type]postfixParseFn
 	ternaryParseFns map[token.Type]ternaryParseFn
+
+	commandStyleMode bool
 }
 
 // Errors return parsing error strings..
@@ -76,16 +80,19 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Ident, p.parseIdentifier)
 	p.registerPrefix(token.ProcIdent, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
-	p.registerPrefix(token.String, p.parseStringLIteral)
+	p.registerPrefix(token.String, p.parseStringLiteral)
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
 	p.registerPrefix(token.Decrement, p.parsePrefixExpression)
 	p.registerPrefix(token.Increment, p.parsePrefixExpression)
 	p.registerPrefix(token.True, p.parseBoolean)
 	p.registerPrefix(token.False, p.parseBoolean)
+	// TODO: on off parse
+	// TODO: vector matrix parse
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
 	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
+	p.registerPrefix(token.BackQuotes, p.parseBackQuotesCallExpression)
 
 	// set infix parse func.
 	p.infixParseFns = make(map[token.Type]infixParseFn)
@@ -162,6 +169,12 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 	leftExp := prefix()
 
+	if p.curTokenIs(token.ProcIdent) &&
+		!p.peekTokenIs(token.Lparen) &&
+		p.commandStyleMode == false {
+		leftExp = p.parseCommandCallExpression(leftExp)
+	}
+
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() {
 		ternary := p.ternaryParseFns[p.peekToken.Type]
 		if ternary != nil {
@@ -171,6 +184,9 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		postfix := p.postfixParseFns[p.peekToken.Type]
 		if postfix != nil {
 			leftExp = postfix(leftExp)
+		}
+		if p.commandStyleMode && p.peekTokenIs(token.Lparen) {
+			return leftExp
 		}
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
@@ -248,6 +264,84 @@ func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expressi
 	return expression
 }
 
+// like this:
+//   add 1 (2 + 3) a "b";
+func (p *Parser) parseCommandCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	preCommandMode := p.commandStyleMode
+	p.commandStyleMode = true
+	exp.Arguments = p.parseCommandCallArguments()
+	p.commandStyleMode = preCommandMode
+	return exp
+}
+
+func (p *Parser) parseCommandCallArguments() []ast.Expression {
+	var args []ast.Expression
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for !p.peekTokenIs(token.Semicolon) && !p.peekTokenIs(token.EOF) {
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.peekTokenIs(token.Semicolon) {
+		return nil
+	}
+	p.nextToken()
+
+	return args
+}
+
+// like this:
+//   `add 1 (2 + 3) a "b"`;
+func (p *Parser) parseBackQuotesCallExpression() ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken}
+	if p.peekTokenIs(token.ProcIdent) {
+		p.nextToken()
+		exp.Function = p.parseIdentifier()
+	} else {
+		return nil
+	}
+	preCommandMode := p.commandStyleMode
+	p.commandStyleMode = true
+	exp.Arguments = p.parseBackQuotesCallArguments()
+	p.commandStyleMode = preCommandMode
+	return exp
+}
+
+func (p *Parser) parseBackQuotesCallArguments() []ast.Expression {
+	var args []ast.Expression
+
+	if p.peekTokenIs(token.BackQuotes) {
+		p.nextToken()
+		return args
+	}
+
+	p.nextToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for !p.peekTokenIs(token.BackQuotes) && !p.peekTokenIs(token.EOF) {
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.peekTokenIs(token.BackQuotes) {
+		return nil
+	}
+	p.nextToken()
+
+	return args
+}
+
+// like this:
+//   add(1, (2 + 3), "a", "b");
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 	exp.Arguments = p.parseCallArguments()
@@ -503,7 +597,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseStringLIteral() ast.Expression {
+func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
 }
 
