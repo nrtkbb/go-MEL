@@ -268,10 +268,13 @@ func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expressi
 //   add 1 (2 + 3) a "b";
 func (p *Parser) parseCommandCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+
 	preCommandMode := p.commandStyleMode
 	p.commandStyleMode = true
+	defer func() { p.commandStyleMode = preCommandMode }()
+
 	exp.Arguments = p.parseCommandCallArguments()
-	p.commandStyleMode = preCommandMode
+
 	return exp
 }
 
@@ -309,10 +312,13 @@ func (p *Parser) parseBackQuotesCallExpression() ast.Expression {
 	} else {
 		return nil
 	}
+
 	preCommandMode := p.commandStyleMode
 	p.commandStyleMode = true
+	defer func() { p.commandStyleMode = preCommandMode }()
+
 	exp.Arguments = p.parseBackQuotesCallArguments()
-	p.commandStyleMode = preCommandMode
+
 	return exp
 }
 
