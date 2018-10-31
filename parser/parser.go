@@ -391,8 +391,11 @@ func (p *Parser) parseStringStatement() ast.Statement {
 		return nil
 	}
 
-	// TODO: skip to semicolon.
-	for !p.curTokenIs(token.Semicolon) {
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -404,8 +407,9 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 
 	p.nextToken()
 
-	// TODO: skip to semicolon.
-	for !p.curTokenIs(token.Semicolon) {
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
