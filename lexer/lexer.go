@@ -67,6 +67,10 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.rune {
+	case '&':
+		tok = l.peekRuneCheck('&', token.And, token.Illegal)
+	case '|':
+		tok = l.peekRuneCheck('|', token.Or, token.Illegal)
 	case '=':
 		tok = l.peekRuneCheck('=', token.Eq, token.Assign)
 	case '!':

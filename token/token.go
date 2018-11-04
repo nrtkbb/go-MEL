@@ -47,6 +47,8 @@ const (
 
 	Eq        = "=="
 	NotEq     = "!="
+	And       = "&&"
+	Or        = "||"
 	Increment = "++"
 	Decrement = "--"
 

@@ -252,6 +252,8 @@ getAttr -s "pCubeShape1.fc";
 string $ls[] = ` + "`ls -sl`" + `;
 
 {1, 2};
+
+int $t = true && false || true;
 `
 
 	tests := []struct {
@@ -406,6 +408,15 @@ string $ls[] = ` + "`ls -sl`" + `;
 		{token.Comma, ","},
 		{token.Int, "2"},
 		{token.Rbrace, "}"},
+		{token.Semicolon, ";"},
+		{token.IntDec, "int"},
+		{token.Ident, "$t"},
+		{token.Assign, "="},
+		{token.True, "true"},
+		{token.And, "&&"},
+		{token.False, "false"},
+		{token.Or, "||"},
+		{token.True, "true"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}
