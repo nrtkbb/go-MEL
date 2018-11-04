@@ -90,9 +90,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Increment, p.parsePrefixExpression)
 	p.registerPrefix(token.True, p.parseBoolean)
 	p.registerPrefix(token.False, p.parseBoolean)
+	p.registerPrefix(token.On, p.parseBoolean)
+	p.registerPrefix(token.Off, p.parseBoolean)
 	p.registerPrefix(token.Ltensor, p.parseTensorLiteral)
 	p.registerPrefix(token.Lbrace, p.parseArrayLiteral)
-	// TODO: on off parse
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
 	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
