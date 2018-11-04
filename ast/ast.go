@@ -344,9 +344,9 @@ func (bs *BlockStatement) String() string {
 
 // IntStatement ...
 type IntStatement struct {
-	Token token.Token // token.IntDec
-	Name  *Identifier
-	Value Expression
+	Token  token.Token // token.IntDec
+	Names  []*Identifier
+	Values []Expression
 }
 
 func (is *IntStatement) statementNode() {}
@@ -362,12 +362,16 @@ func (is *IntStatement) String() string {
 
 	out.WriteString(is.TokenLiteral())
 	out.WriteString(" ")
-	out.WriteString(is.Name.String())
-	out.WriteString(" = ")
 
-	if is.Value != nil {
-		out.WriteString(is.Value.String())
+	var outNames []string
+	for i, name := range is.Names {
+		if is.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+is.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
 	}
+	out.WriteString(strings.Join(outNames, ", "))
 
 	out.WriteString(";")
 
@@ -381,24 +385,24 @@ type StringStatement struct {
 	Values []Expression
 }
 
-func (ls *StringStatement) statementNode() {}
+func (ss *StringStatement) statementNode() {}
 
 // TokenLiteral ...
-func (ls *StringStatement) TokenLiteral() string {
-	return ls.Token.Literal
+func (ss *StringStatement) TokenLiteral() string {
+	return ss.Token.Literal
 }
 
 // String ...
-func (ls *StringStatement) String() string {
+func (ss *StringStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(ls.TokenLiteral())
+	out.WriteString(ss.TokenLiteral())
 	out.WriteString(" ")
 
 	var outNames []string
-	for i, name := range ls.Names {
-		if ls.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+ls.Values[i].String())
+	for i, name := range ss.Names {
+		if ss.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+ss.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}

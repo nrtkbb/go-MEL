@@ -387,15 +387,7 @@ func (p *Parser) parseIntStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-	if !p.expectPeek(token.Assign) {
-		return nil
-	}
-
-	p.nextToken()
-
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Names, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -411,39 +403,48 @@ func (p *Parser) parseStringStatement() ast.Statement {
 		return nil
 	}
 
-	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	stmt.Names = append(stmt.Names, name)
-	if !p.peekTokenIs(token.Assign) {
-		stmt.Values = append(stmt.Values, nil)
-	} else {
-		p.nextToken()
-		p.nextToken()
-		value := p.parseExpression(LOWEST)
-		stmt.Values = append(stmt.Values, value)
-	}
-
-	for p.peekTokenIs(token.Comma) {
-		p.nextToken()
-		p.nextToken()
-		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		stmt.Names = append(stmt.Names, name)
-
-		if !p.peekTokenIs(token.Assign) {
-			stmt.Values = append(stmt.Values, nil)
-			continue
-		}
-		p.nextToken()
-		p.nextToken()
-
-		value := p.parseExpression(LOWEST)
-		stmt.Values = append(stmt.Values, value)
-	}
+	stmt.Names, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseBulkDefinition() ([]*ast.Identifier, []ast.Expression) {
+	var names []*ast.Identifier
+	var values []ast.Expression
+
+	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	names = append(names, name)
+	if !p.peekTokenIs(token.Assign) {
+		values = append(values, nil)
+	} else {
+		p.nextToken()
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		values = append(values, value)
+	}
+
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		names = append(names, name)
+
+		if !p.peekTokenIs(token.Assign) {
+			values = append(values, nil)
+			continue
+		}
+		p.nextToken()
+		p.nextToken()
+
+		value := p.parseExpression(LOWEST)
+		values = append(values, value)
+	}
+
+	return names, values
 }
 
 func (p *Parser) parseReturnStatement() ast.Statement {
