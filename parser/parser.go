@@ -87,6 +87,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Increment, p.parsePrefixExpression)
 	p.registerPrefix(token.True, p.parseBoolean)
 	p.registerPrefix(token.False, p.parseBoolean)
+	p.registerPrefix(token.Ltensor, p.parseTensorLiteral)
 	// TODO: on off parse
 	// TODO: vector matrix parse
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
@@ -144,6 +145,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseStringStatement()
 	case token.IntDec:
 		return p.parseIntStatement()
+	case token.VectorDec:
+		return p.parseVectorStatement()
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
@@ -378,6 +381,22 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseVectorStatement() ast.Statement {
+	stmt := &ast.VectorStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.Ident) {
+		return nil
+	}
+
+	stmt.Names, stmt.Values = p.parseBulkDefinition()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseIntStatement() ast.Statement {
@@ -654,6 +673,39 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 func (p *Parser) parseStringLiteral() ast.Expression {
 	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseTensorLiteral() ast.Expression {
+	tl := &ast.TensorLiteral{Token: p.curToken}
+	p.nextToken()
+
+	var value []ast.Expression
+	value = append(value, p.parseExpression(LOWEST))
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		value = append(value, p.parseExpression(LOWEST))
+	}
+	tl.Values = append(tl.Values, value)
+	value = nil
+
+	for p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+		value = append(value, p.parseExpression(LOWEST))
+		for p.peekTokenIs(token.Comma) {
+			p.nextToken()
+			p.nextToken()
+			value = append(value, p.parseExpression(LOWEST))
+		}
+		tl.Values = append(tl.Values, value)
+		value = nil
+	}
+
+	if !p.expectPeek(token.Rtensor) {
+		return nil
+	}
+
+	return tl
 }
 
 func (p *Parser) parseBoolean() ast.Expression {

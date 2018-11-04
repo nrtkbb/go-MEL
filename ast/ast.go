@@ -342,6 +342,42 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
+// VectorStatement ...
+type VectorStatement struct {
+	Token  token.Token // token.VectorDec
+	Names  []*Identifier
+	Values []Expression
+}
+
+func (vs *VectorStatement) statementNode() {}
+
+// TokenLiteral ...
+func (vs *VectorStatement) TokenLiteral() string {
+	return vs.Token.Literal
+}
+
+// String ...
+func (vs *VectorStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(vs.TokenLiteral())
+	out.WriteString(" ")
+
+	var outNames []string
+	for i, name := range vs.Names {
+		if vs.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+vs.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
+	}
+	out.WriteString(strings.Join(outNames, ", "))
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // IntStatement ...
 type IntStatement struct {
 	Token  token.Token // token.IntDec
@@ -513,4 +549,39 @@ func (b *Boolean) TokenLiteral() string {
 // String ...
 func (b *Boolean) String() string {
 	return b.Token.Literal
+}
+
+// TensorLiteral ...
+type TensorLiteral struct {
+	Token  token.Token // token.Ltensor
+	Values [][]Expression
+}
+
+func (vl *TensorLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (vl *TensorLiteral) TokenLiteral() string {
+	return vl.Token.Literal
+}
+
+// String ...
+func (vl *TensorLiteral) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("<<")
+
+	var outValues []string
+	for _, v := range vl.Values {
+		var inValues []string
+		for _, vv := range v {
+			inValues = append(inValues, vv.String())
+		}
+		outValues = append(outValues, strings.Join(inValues, ", "))
+		inValues = nil
+	}
+	out.WriteString(strings.Join(outValues, ";\n  "))
+
+	out.WriteString(">>")
+
+	return out.String()
 }
