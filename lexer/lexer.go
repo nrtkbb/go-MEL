@@ -228,7 +228,7 @@ func (l *Lexer) peekRuneCheck(peek rune, trueType, falseType token.Type) token.T
 func (l *Lexer) readString() string {
 	position := l.position
 	l.readRune() // '"'
-	for '"' != l.rune {
+	for '"' != l.rune && 0 != l.rune {
 		if '\\' == l.rune {
 			l.readRune() // '\\'
 		}
