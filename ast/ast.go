@@ -414,22 +414,22 @@ func (ms *MatrixStatement) String() string {
 	return out.String()
 }
 
-// IntStatement ...
-type IntStatement struct {
+// IntegerStatement ...
+type IntegerStatement struct {
 	Token  token.Token // token.IntDec
 	Names  []Expression
 	Values []Expression
 }
 
-func (is *IntStatement) statementNode() {}
+func (is *IntegerStatement) statementNode() {}
 
 // TokenLiteral ...
-func (is *IntStatement) TokenLiteral() string {
+func (is *IntegerStatement) TokenLiteral() string {
 	return is.Token.Literal
 }
 
 // String ...
-func (is *IntStatement) String() string {
+func (is *IntegerStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString(is.TokenLiteral())
@@ -439,6 +439,42 @@ func (is *IntStatement) String() string {
 	for i, name := range is.Names {
 		if is.Values[i] != nil {
 			outNames = append(outNames, name.String()+" = "+is.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
+	}
+	out.WriteString(strings.Join(outNames, ", "))
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
+// FloatStatement ...
+type FloatStatement struct {
+	Token  token.Token // token.FloatDec
+	Names  []Expression
+	Values []Expression
+}
+
+func (fs *FloatStatement) statementNode() {}
+
+// TokenLiteral ...
+func (fs *FloatStatement) TokenLiteral() string {
+	return fs.Token.Literal
+}
+
+// String ...
+func (fs *FloatStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(fs.TokenLiteral())
+	out.WriteString(" ")
+
+	var outNames []string
+	for i, name := range fs.Names {
+		if fs.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+fs.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -605,6 +641,24 @@ func (il *IntegerLiteral) TokenLiteral() string {
 // String ...
 func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
+}
+
+// FloatLiteral ...
+type FloatLiteral struct {
+	Token token.Token // token.Float
+	Value float64
+}
+
+func (fl *FloatLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (fl *FloatLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+// String ...
+func (fl *FloatLiteral) String() string {
+	return fl.Token.Literal
 }
 
 // StringLiteral ...

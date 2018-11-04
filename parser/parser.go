@@ -82,6 +82,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Ident, p.parseIdentifier)
 	p.registerPrefix(token.ProcIdent, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
+	p.registerPrefix(token.Float, p.parseFloatLiteral)
 	p.registerPrefix(token.String, p.parseStringLiteral)
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
@@ -147,7 +148,9 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.StringDec:
 		return p.parseStringStatement()
 	case token.IntDec:
-		return p.parseIntStatement()
+		return p.parseIntegerStatement()
+	case token.FloatDec:
+		return p.parseFloatStatement()
 	case token.VectorDec:
 		return p.parseVectorStatement()
 	case token.MatrixDec:
@@ -414,8 +417,24 @@ func (p *Parser) parseVectorStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseIntStatement() ast.Statement {
-	stmt := &ast.IntStatement{Token: p.curToken}
+func (p *Parser) parseIntegerStatement() ast.Statement {
+	stmt := &ast.IntegerStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.Ident) {
+		return nil
+	}
+
+	stmt.Names, stmt.Values = p.parseBulkDefinition()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseFloatStatement() ast.Statement {
+	stmt := &ast.FloatStatement{Token: p.curToken}
 
 	if !p.expectPeek(token.Ident) {
 		return nil
@@ -677,6 +696,21 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	lit.Value = value
+
+	return lit
+}
+
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	lit := &ast.FloatLiteral{Token: p.curToken}
+
+	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as float", p.curToken.Literal)
 		p.errors = append(p.errors, msg)
 		return nil
 	}

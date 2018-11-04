@@ -742,7 +742,41 @@ func TestVectorStatement2(t *testing.T) {
 	}
 }
 
-func TestIntStatement2(t *testing.T) {
+func TestFloatStatement(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{`float $x = 123.123;`, "$x", 123.123},
+		{`float $y = 0.1;`, "$y", 0.1},
+		{`float $foobar = 0;`, "$foobar", 0},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testFloatStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		val := stmt.(*ast.FloatStatement).Values[0]
+		if !testLiteralExpression(t, val, tt.expectedValue) {
+			return
+		}
+	}
+}
+
+func TestIntegerStatement2(t *testing.T) {
 	tests := []struct {
 		input               string
 		expectedIdentifiers []string
@@ -771,11 +805,11 @@ func TestIntStatement2(t *testing.T) {
 		}
 
 		stmt := program.Statements[0]
-		if !testIntStatement2(t, stmt, tt.expectedIdentifiers) {
+		if !testIntegerStatement2(t, stmt, tt.expectedIdentifiers) {
 			return
 		}
 
-		vals := stmt.(*ast.IntStatement).Values
+		vals := stmt.(*ast.IntegerStatement).Values
 		for i, val := range vals {
 			if !testLiteralExpression(t, val, tt.expectedValues[i]) {
 				return
@@ -784,7 +818,7 @@ func TestIntStatement2(t *testing.T) {
 	}
 }
 
-func TestIntStatement(t *testing.T) {
+func TestIntegerStatement(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
@@ -807,11 +841,11 @@ func TestIntStatement(t *testing.T) {
 		}
 
 		stmt := program.Statements[0]
-		if !testIntStatement(t, stmt, tt.expectedIdentifier) {
+		if !testIntegerStatement(t, stmt, tt.expectedIdentifier) {
 			return
 		}
 
-		val := stmt.(*ast.IntStatement).Values[0]
+		val := stmt.(*ast.IntegerStatement).Values[0]
 		if !testLiteralExpression(t, val, tt.expectedValue) {
 			return
 		}
@@ -973,15 +1007,15 @@ func testVectorStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	return true
 }
 
-func testIntStatement2(t *testing.T, s ast.Statement, names []string) bool {
+func testIntegerStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	if s.TokenLiteral() != "int" {
 		t.Errorf("s.TokenLiteral not 'int'. got=%q", s.TokenLiteral())
 		return false
 	}
 
-	intStmt, ok := s.(*ast.IntStatement)
+	intStmt, ok := s.(*ast.IntegerStatement)
 	if !ok {
-		t.Errorf("s not *ast.IntStatement. got=%T", s)
+		t.Errorf("s not *ast.IntegerStatement. got=%T", s)
 		return false
 	}
 
@@ -1071,15 +1105,46 @@ func testMatrixStatement(t *testing.T, s ast.Statement, name string, i1 int64, i
 	return true
 }
 
-func testIntStatement(t *testing.T, s ast.Statement, name string) bool {
+func testIntegerStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "int" {
 		t.Errorf("s.TokenLiteral not 'int'. got=%q", s.TokenLiteral())
 		return false
 	}
 
-	intStmt, ok := s.(*ast.IntStatement)
+	intStmt, ok := s.(*ast.IntegerStatement)
 	if !ok {
-		t.Errorf("s not *ast.IntStatement. got=%T", s)
+		t.Errorf("s not *ast.IntegerStatement. got=%T", s)
+		return false
+	}
+
+	nameIdent, ok := intStmt.Names[0].(*ast.Identifier)
+	if !ok {
+		t.Errorf("intStmt.Names[0] does not ast.Identifier. got=%T", intStmt.Names[0])
+		return false
+	}
+
+	if nameIdent.Value != name {
+		t.Errorf("nameIdent.Value not '%s'. got=%s", name, nameIdent.Value)
+		return false
+	}
+
+	if nameIdent.TokenLiteral() != name {
+		t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", name, nameIdent.Value)
+		return false
+	}
+
+	return true
+}
+
+func testFloatStatement(t *testing.T, s ast.Statement, name string) bool {
+	if s.TokenLiteral() != "float" {
+		t.Errorf("s.TokenLiteral not 'float'. got=%q", s.TokenLiteral())
+		return false
+	}
+
+	intStmt, ok := s.(*ast.FloatStatement)
+	if !ok {
+		t.Errorf("s not *ast.FloatStatement. got=%T", s)
 		return false
 	}
 
@@ -1204,6 +1269,8 @@ func testLiteralExpression(
 		return testIntegerLiteral(t, exp, int64(v))
 	case int64:
 		return testIntegerLiteral(t, exp, v)
+	case float64:
+		return testFloatLiteral(t, exp, v)
 	case string:
 		if v[0] == '"' {
 			return testStringLiteral(t, exp, v)
@@ -1254,6 +1321,27 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 	if integ.TokenLiteral() != fmt.Sprintf("%d", value) {
 		t.Errorf("integ.TokenLiteral not %d. got=%s",
 			value, integ.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testFloatLiteral(t *testing.T, flexp ast.Expression, value float64) bool {
+	flLit, ok := flexp.(*ast.FloatLiteral)
+	if !ok {
+		t.Errorf("flexp not *ast.IntegerLiteral. got=%T", flexp)
+		return false
+	}
+
+	if flLit.Value != value {
+		t.Errorf("flLit.Value not %f, got=%f", value, flLit.Value)
+		return false
+	}
+
+	if flLit.TokenLiteral() != fmt.Sprint(value) {
+		t.Errorf("flLit.TokenLiteral not %f. got=%s",
+			value, flLit.TokenLiteral())
 		return false
 	}
 
