@@ -345,7 +345,7 @@ func (bs *BlockStatement) String() string {
 // VectorStatement ...
 type VectorStatement struct {
 	Token  token.Token // token.VectorDec
-	Names  []*Identifier
+	Names  []Expression
 	Values []Expression
 }
 
@@ -378,10 +378,46 @@ func (vs *VectorStatement) String() string {
 	return out.String()
 }
 
+// MatrixStatement ...
+type MatrixStatement struct {
+	Token  token.Token // token.MatrixDec
+	Names  []Expression
+	Values []Expression
+}
+
+func (ms *MatrixStatement) statementNode() {}
+
+// TokenLiteral ...
+func (ms *MatrixStatement) TokenLiteral() string {
+	return ms.Token.Literal
+}
+
+// String ...
+func (ms *MatrixStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ms.TokenLiteral())
+	out.WriteString(" ")
+
+	var outNames []string
+	for i, name := range ms.Names {
+		if ms.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+ms.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
+	}
+	out.WriteString(strings.Join(outNames, ", "))
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // IntStatement ...
 type IntStatement struct {
 	Token  token.Token // token.IntDec
-	Names  []*Identifier
+	Names  []Expression
 	Values []Expression
 }
 
@@ -417,7 +453,7 @@ func (is *IntStatement) String() string {
 // StringStatement ...
 type StringStatement struct {
 	Token  token.Token // token.StringDec
-	Names  []*Identifier
+	Names  []Expression
 	Values []Expression
 }
 
@@ -446,6 +482,62 @@ func (ss *StringStatement) String() string {
 	out.WriteString(strings.Join(outNames, ", "))
 
 	out.WriteString(";")
+
+	return out.String()
+}
+
+// ArrayLiteral ...
+type ArrayLiteral struct {
+	Token    token.Token // '{' token
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expressionNode() {}
+
+// TokenLiteral ...
+func (al *ArrayLiteral) TokenLiteral() string {
+	return al.Token.Literal
+}
+
+// String ...
+func (al *ArrayLiteral) String() string {
+	var out bytes.Buffer
+
+	var elements []string
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
+
+// IndexExpression ...
+type IndexExpression struct {
+	Token token.Token // token.Lbracket
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (ie *IndexExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+// String ...
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
 
 	return out.String()
 }

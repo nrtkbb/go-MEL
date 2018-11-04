@@ -8,6 +8,52 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestParsingIndexExpressions(t *testing.T) {
+	input := "$myArray[1 + 1]"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	indexExp, ok := stmt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.IndexExpression. got=%T", stmt.Expression)
+	}
+
+	if !testIdentifier(t, indexExp.Left, "$myArray") {
+		return
+	}
+
+	if !testInfixExpression(t, indexExp.Index, 1, "+", 1) {
+		return
+	}
+}
+
+func TestParsingArrayLiteral(t *testing.T) {
+	input := "{1, 2 * 2, 3 + 3};"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	if !ok {
+		t.Fatalf("exp not ast.ArrayLiteral. got=%T", stmt.Expression)
+	}
+
+	if len(array.Elements) != 3 {
+		t.Fatalf("len(array.Elements) not 3, got=%d", len(array.Elements))
+	}
+
+	testIntegerLiteral(t, array.Elements[0], 1)
+	testInfixExpression(t, array.Elements[1], 2, "*", 2)
+	testInfixExpression(t, array.Elements[2], 3, "+", 3)
+}
+
 func TestCallExpressionParsing3(t *testing.T) {
 	input := "add 1 (2 + 3) `add 1 2 a \"b\"` a \"b\";"
 
@@ -292,6 +338,8 @@ func TestOperatorPrecendenceParsing(t *testing.T) {
 			"add($a, $b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"},
 		{"add($a + $b + $c * $d / $f + $g)",
 			"add(((($a + $b) + (($c * $d) / $f)) + $g))"},
+		{"add($a * $b[2], $b[1], 2 * 1)",
+			"add(($a * ($b[2])), ($b[1]), (2 * 1))"},
 	}
 
 	for _, tt := range tests {
@@ -570,6 +618,88 @@ func TestReturnStatement(t *testing.T) {
 	}
 }
 
+func TestMatrixStatement(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		i1                 int64
+		i2                 int64
+		expectedValue      [][]float64
+	}{
+		{`matrix $x[2][3] = <<1, 2>>;`, "$x", 3, 2, nil},
+		{`matrix $y[1][1] = <<1>>;`, "$y", 1, 1, nil},
+		{`matrix $foobar[1][1] = <<123123>>`, "$foobar", 1, 1, nil},
+	}
+
+	tests[0].expectedValue = append(tests[0].expectedValue, []float64{1, 2})
+	tests[1].expectedValue = append(tests[1].expectedValue, []float64{1})
+	tests[2].expectedValue = append(tests[2].expectedValue, []float64{123123})
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testMatrixStatement(t, stmt, tt.expectedIdentifier, tt.i1, tt.i2) {
+			return
+		}
+
+		val := stmt.(*ast.MatrixStatement).Values[0]
+		if !testLiteralExpression(t, val, tt.expectedValue) {
+			return
+		}
+	}
+}
+
+func TestMatrixStatement2(t *testing.T) {
+	tests := []struct {
+		input               string
+		expectedIdentifiers []string
+		expectedValues      []interface{}
+	}{
+		{`matrix $x = <<1, 2, 3>>, $y, $z = <<2, 3, 4>>;`, []string{"$x", "$y", "$z"}, nil},
+		{`matrix $x, $y = <<1, 2, 3>>, $z = <<2, 3, 4>>;`, []string{"$x", "$y", "$z"}, nil},
+	}
+
+	tests[0].expectedValues = append(tests[0].expectedValues, [][]float64{{1, 2, 3}})
+	tests[0].expectedValues = append(tests[0].expectedValues, nil)
+	tests[0].expectedValues = append(tests[0].expectedValues, [][]float64{{2, 3, 4}})
+	tests[1].expectedValues = append(tests[1].expectedValues, nil)
+	tests[1].expectedValues = append(tests[1].expectedValues, [][]float64{{1, 2, 3}})
+	tests[1].expectedValues = append(tests[1].expectedValues, [][]float64{{2, 3, 4}})
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testMatrixStatement2(t, stmt, tt.expectedIdentifiers) {
+			return
+		}
+
+		vals := stmt.(*ast.MatrixStatement).Values
+		for i, val := range vals {
+			if !testLiteralExpression(t, val, tt.expectedValues[i]) {
+				return
+			}
+		}
+	}
+}
+
 func TestVectorStatement2(t *testing.T) {
 	tests := []struct {
 		input               string
@@ -777,6 +907,39 @@ func checkParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 
+func testMatrixStatement2(t *testing.T, s ast.Statement, names []string) bool {
+	if s.TokenLiteral() != "matrix" {
+		t.Errorf("s.TokenLiteral not 'matrix'. got=%q", s.TokenLiteral())
+		return false
+	}
+
+	matStmt, ok := s.(*ast.MatrixStatement)
+	if !ok {
+		t.Errorf("s not *ast.MatrixStatement. got=%T", s)
+		return false
+	}
+
+	for i, stmtName := range matStmt.Names {
+		nameIdent, ok := stmtName.(*ast.Identifier)
+		if !ok {
+			t.Errorf("matStmt.Name does not ast.Identifier. got=%T", stmtName)
+			return false
+		}
+
+		if nameIdent.Value != names[i] {
+			t.Errorf("nameIdent.Value not '%s'. got=%s", names[i], nameIdent.Value)
+			return false
+		}
+
+		if nameIdent.TokenLiteral() != names[i] {
+			t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", names[i], nameIdent.TokenLiteral())
+			return false
+		}
+	}
+
+	return true
+}
+
 func testVectorStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	if s.TokenLiteral() != "vector" {
 		t.Errorf("s.TokenLiteral not 'vector'. got=%q", s.TokenLiteral())
@@ -790,13 +953,19 @@ func testVectorStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	}
 
 	for i, stmtName := range vecStmt.Names {
-		if stmtName.Value != names[i] {
-			t.Errorf("vecStmt.Name.Value not '%s'. got=%s", names[i], stmtName.Value)
+		nameIdent, ok := stmtName.(*ast.Identifier)
+		if !ok {
+			t.Errorf("vecStmt.Name does not ast.Identifier. got=%T", stmtName)
 			return false
 		}
 
-		if stmtName.TokenLiteral() != names[i] {
-			t.Errorf("vecStmt.Name.TokenLiteral not '%s'. got=%s", names[i], stmtName.TokenLiteral())
+		if nameIdent.Value != names[i] {
+			t.Errorf("nameIdent.Value not '%s'. got=%s", names[i], nameIdent.Value)
+			return false
+		}
+
+		if nameIdent.TokenLiteral() != names[i] {
+			t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", names[i], nameIdent.TokenLiteral())
 			return false
 		}
 	}
@@ -817,15 +986,86 @@ func testIntStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	}
 
 	for i, stmtName := range intStmt.Names {
-		if stmtName.Value != names[i] {
-			t.Errorf("intStmt.Name.Value not '%s'. got=%s", names[i], stmtName.Value)
+		nameIdent, ok := stmtName.(*ast.Identifier)
+		if !ok {
+			t.Errorf("stmtName does not ast.Identifier. got=%T", stmtName)
 			return false
 		}
 
-		if stmtName.TokenLiteral() != names[i] {
-			t.Errorf("intStmt.Name.TokenLiteral not '%s'. got=%s", names[i], stmtName.TokenLiteral())
+		if nameIdent.Value != names[i] {
+			t.Errorf("nameIndent.Value not '%s'. got=%s", names[i], nameIdent.Value)
 			return false
 		}
+
+		if nameIdent.TokenLiteral() != names[i] {
+			t.Errorf("nameIndent.TokenLiteral not '%s'. got=%s", names[i], nameIdent.TokenLiteral())
+			return false
+		}
+	}
+
+	return true
+}
+
+func testMatrixStatement(t *testing.T, s ast.Statement, name string, i1 int64, i2 int64) bool {
+	if s.TokenLiteral() != "matrix" {
+		t.Errorf("s.TokenLiteral not 'matrix'. got=%q", s.TokenLiteral())
+		return false
+	}
+
+	matStmt, ok := s.(*ast.MatrixStatement)
+	if !ok {
+		t.Errorf("s not *ast.MatrixStatement. got=%T", s)
+		return false
+	}
+
+	idxExp1, ok := matStmt.Names[0].(*ast.IndexExpression)
+	if !ok {
+		t.Errorf("matStmt.Names[0] does not ast.IndexExpression. got=%T", matStmt.Names[0])
+		return false
+	}
+
+	idx1, ok := idxExp1.Index.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("idxExp1.Index does not ast.IntegerLiteral. got=%T", idxExp1.Index)
+		return false
+	}
+
+	if idx1.Value != i1 {
+		t.Errorf("idx1.Value not %d. got=%d", i1, idx1.Value)
+		return false
+	}
+
+	idxExp2, ok := idxExp1.Left.(*ast.IndexExpression)
+	if !ok {
+		t.Errorf("idxExp1.Left does not ast.IndexExpression. got=%T", idxExp1.Left)
+		return false
+	}
+
+	idx2, ok := idxExp2.Index.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("idxExp2.Index does not ast.IntegerLiteral. got=%T", idxExp2.Index)
+		return false
+	}
+
+	if idx2.Value != i2 {
+		t.Errorf("idx2.Value not %d. got=%d", i2, idx2.Value)
+		return false
+	}
+
+	nameIdent, ok := idxExp2.Left.(*ast.Identifier)
+	if !ok {
+		t.Errorf("idxExp2.Left does not ast.Identifier. got=%T", idxExp2.Left)
+		return false
+	}
+
+	if nameIdent.Value != name {
+		t.Errorf("nameIdent.Value not '%s'. got=%s", name, nameIdent.Value)
+		return false
+	}
+
+	if nameIdent.TokenLiteral() != name {
+		t.Errorf("nameIdent.TokenLiteral() not '%s'. got=%s", name, nameIdent.Value)
+		return false
 	}
 
 	return true
@@ -843,13 +1083,19 @@ func testIntStatement(t *testing.T, s ast.Statement, name string) bool {
 		return false
 	}
 
-	if intStmt.Names[0].Value != name {
-		t.Errorf("intStmt.Name.Value not '%s'. got=%s", name, intStmt.Names[0].Value)
+	nameIdent, ok := intStmt.Names[0].(*ast.Identifier)
+	if !ok {
+		t.Errorf("intStmt.Names[0] does not ast.Identifier. got=%T", intStmt.Names[0])
 		return false
 	}
 
-	if intStmt.Names[0].TokenLiteral() != name {
-		t.Errorf("intStmt.Name.Value not '%s'. got=%s", name, intStmt.Names[0].Value)
+	if nameIdent.Value != name {
+		t.Errorf("nameIdent.Value not '%s'. got=%s", name, nameIdent.Value)
+		return false
+	}
+
+	if nameIdent.TokenLiteral() != name {
+		t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", name, nameIdent.Value)
 		return false
 	}
 
@@ -869,13 +1115,19 @@ func testStringStatement2(t *testing.T, s ast.Statement, names []string) bool {
 	}
 
 	for i, stmtName := range stringStmt.Names {
-		if stmtName.Value != names[i] {
-			t.Errorf("stringStmt.Name.Value not '%s'. got=%s", names[i], stmtName.Value)
+		nameIdent, ok := stmtName.(*ast.Identifier)
+		if !ok {
+			t.Errorf("stmtName does not ast.Identifier. got=%T", stmtName)
 			return false
 		}
 
-		if stmtName.TokenLiteral() != names[i] {
-			t.Errorf("stringStmt.Name.TokenLiteral not '%s'. got=%s", names[i], stmtName.TokenLiteral())
+		if nameIdent.Value != names[i] {
+			t.Errorf("nameIdent.Value not '%s'. got=%s", names[i], nameIdent.Value)
+			return false
+		}
+
+		if nameIdent.TokenLiteral() != names[i] {
+			t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", names[i], nameIdent.TokenLiteral())
 			return false
 		}
 	}
@@ -895,13 +1147,18 @@ func testStringStatement(t *testing.T, s ast.Statement, name string) bool {
 		return false
 	}
 
-	if stringStmt.Names[0].Value != name {
-		t.Errorf("stringStmt.Name.Value not '%s'. got=%s", name, stringStmt.Names[0].Value)
+	nameIdent, ok := stringStmt.Names[0].(*ast.Identifier)
+	if !ok {
+		t.Errorf("stringStmt.Names[0] does not ast.Identifier. got=%T", stringStmt.Names[0])
+		return false
+	}
+	if nameIdent.Value != name {
+		t.Errorf("nameIdent.Value not '%s'. got=%s", name, nameIdent.Value)
 		return false
 	}
 
-	if stringStmt.Names[0].TokenLiteral() != name {
-		t.Errorf("stringStmt.Name.TokenLiteral not '%s'. got=%s", name, stringStmt.Names[0].TokenLiteral())
+	if nameIdent.TokenLiteral() != name {
+		t.Errorf("nameIdent.TokenLiteral not '%s'. got=%s", name, nameIdent.TokenLiteral())
 		return false
 	}
 
@@ -957,13 +1214,13 @@ func testLiteralExpression(
 	case nil:
 		return testNil(t, exp, v)
 	case [][]float64:
-		return testVectorLiteral(t, exp, v)
+		return testTensorLiteral(t, exp, v)
 	}
 	t.Errorf("type of exp not handled. got=%T", exp)
 	return false
 }
 
-func testVectorLiteral(t *testing.T, vl ast.Expression, value [][]float64) bool {
+func testTensorLiteral(t *testing.T, vl ast.Expression, value [][]float64) bool {
 	vector, ok := vl.(*ast.TensorLiteral)
 	if !ok {
 		t.Errorf("il not *ast.TensorLiteral. got=%T", vl)

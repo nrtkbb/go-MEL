@@ -250,6 +250,8 @@ string $str = "test \"test\"";
 
 getAttr -s "pCubeShape1.fc";
 string $ls[] = ` + "`ls -sl`" + `;
+
+{1, 2};
 `
 
 	tests := []struct {
@@ -398,6 +400,12 @@ string $ls[] = ` + "`ls -sl`" + `;
 		{token.ProcIdent, "ls"},
 		{token.Flag, "-sl"},
 		{token.BackQuotes, "`"},
+		{token.Semicolon, ";"},
+		{token.Lbrace, "{"},
+		{token.Int, "1"},
+		{token.Comma, ","},
+		{token.Int, "2"},
+		{token.Rbrace, "}"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}
