@@ -376,9 +376,9 @@ func (is *IntStatement) String() string {
 
 // StringStatement ...
 type StringStatement struct {
-	Token token.Token // token.StringDec
-	Name  *Identifier
-	Value Expression
+	Token  token.Token // token.StringDec
+	Names  []*Identifier
+	Values []Expression
 }
 
 func (ls *StringStatement) statementNode() {}
@@ -394,12 +394,16 @@ func (ls *StringStatement) String() string {
 
 	out.WriteString(ls.TokenLiteral())
 	out.WriteString(" ")
-	out.WriteString(ls.Name.String())
-	out.WriteString(" = ")
 
-	if ls.Value != nil {
-		out.WriteString(ls.Value.String())
+	var outNames []string
+	for i, name := range ls.Names {
+		if ls.Values[i] != nil {
+			outNames = append(outNames, name.String()+" = "+ls.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
 	}
+	out.WriteString(strings.Join(outNames, ", "))
 
 	out.WriteString(";")
 

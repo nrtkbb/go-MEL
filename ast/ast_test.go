@@ -11,14 +11,14 @@ func TestString(t *testing.T) {
 		Statements: []Statement{
 			&StringStatement{
 				Token: token.Token{Type: token.StringDec, Literal: "string"},
-				Name: &Identifier{
+				Names: []*Identifier{{
 					Token: token.Token{Type: token.Ident, Literal: "$myVar"},
 					Value: "$myVar",
-				},
-				Value: &Identifier{
+				}},
+				Values: []Expression{&Identifier{
 					Token: token.Token{Type: token.Ident, Literal: "$anotherVar"},
 					Value: "$anotherVar",
-				},
+				}},
 			},
 		},
 	}

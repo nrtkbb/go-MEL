@@ -411,15 +411,33 @@ func (p *Parser) parseStringStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-	if !p.expectPeek(token.Assign) {
-		return nil
+	name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Names = append(stmt.Names, name)
+	if !p.peekTokenIs(token.Assign) {
+		stmt.Values = append(stmt.Values, nil)
+	} else {
+		p.nextToken()
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		stmt.Values = append(stmt.Values, value)
 	}
 
-	p.nextToken()
+	for p.peekTokenIs(token.Comma) {
+		p.nextToken()
+		p.nextToken()
+		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		stmt.Names = append(stmt.Names, name)
 
-	stmt.Value = p.parseExpression(LOWEST)
+		if !p.peekTokenIs(token.Assign) {
+			stmt.Values = append(stmt.Values, nil)
+			continue
+		}
+		p.nextToken()
+		p.nextToken()
+
+		value := p.parseExpression(LOWEST)
+		stmt.Values = append(stmt.Values, value)
+	}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
