@@ -142,6 +142,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.StringDec:
 		return p.parseStringStatement()
+	case token.IntDec:
+		return p.parseIntStatement()
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
@@ -376,6 +378,30 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseIntStatement() ast.Statement {
+	stmt := &ast.IntStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.Ident) {
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.Assign) {
+		return nil
+	}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseStringStatement() ast.Statement {

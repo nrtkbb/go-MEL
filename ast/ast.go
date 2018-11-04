@@ -342,6 +342,38 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
+// IntStatement ...
+type IntStatement struct {
+	Token token.Token // token.IntDec
+	Name  *Identifier
+	Value Expression
+}
+
+func (is *IntStatement) statementNode() {}
+
+// TokenLiteral ...
+func (is *IntStatement) TokenLiteral() string {
+	return is.Token.Literal
+}
+
+// String ...
+func (is *IntStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(is.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(is.Name.String())
+	out.WriteString(" = ")
+
+	if is.Value != nil {
+		out.WriteString(is.Value.String())
+	}
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // StringStatement ...
 type StringStatement struct {
 	Token token.Token // token.StringDec
