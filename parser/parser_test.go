@@ -224,6 +224,53 @@ proc Proc(string $x, string $y) {
 	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
 }
 
+func TestWhileExpressionSingleBlock(t *testing.T) {
+	input := `while ($x < $y) string $x = "x";`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.WhileExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.WhileExpression. got=%T\n",
+			stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "$x", "<", "$y") {
+		return
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.StringStatement, got=%T\n",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testStringStatement(t, consequence, "$x") {
+		return
+	}
+
+	val := consequence.Values[0]
+	if !testStringLiteral(t, val, `"x"`) {
+		return
+	}
+
+	return
+}
+
 func TestIfExpressionSingleBlock(t *testing.T) {
 	input := `if ($x < $y) string $x = "x";`
 

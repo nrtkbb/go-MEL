@@ -76,6 +76,7 @@ const (
 	MatrixDec = "MatrixDec"
 	BoolDec   = "BoolDec"
 	If        = "If"
+	While     = "While"
 	Else      = "Else"
 	Return    = "Return"
 )
@@ -94,6 +95,7 @@ var keywords = map[string]Type{
 	"off":    Off,
 	"bool":   BoolDec,
 	"if":     If,
+	"while":  While,
 	"else":   Else,
 	"return": Return,
 }

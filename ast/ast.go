@@ -285,6 +285,33 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
+// WhileExpression ...
+type WhileExpression struct {
+	Token       token.Token // while
+	Condition   Expression
+	Consequence *BlockStatement
+}
+
+func (we *WhileExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (we *WhileExpression) TokenLiteral() string {
+	return we.Token.Literal
+}
+
+// String ...
+func (we *WhileExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(we.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(we.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(we.Consequence.String())
+
+	return out.String()
+}
+
 // IfExpression ...
 type IfExpression struct {
 	Token       token.Token // if
