@@ -285,6 +285,80 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
+// ForExpression ...
+type ForExpression struct {
+	Token       token.Token // for
+	InitNames   []Expression
+	InitValues  []Expression
+	Condition   Expression
+	ChangeOf    Expression
+	Consequence *BlockStatement
+}
+
+func (fe *ForExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (fe *ForExpression) TokenLiteral() string {
+	return fe.Token.Literal
+}
+
+// String ...
+func (fe *ForExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(fe.TokenLiteral())
+	out.WriteString(" (")
+
+	var outNames []string
+	for i, name := range fe.InitNames {
+		if fe.InitValues[i] != nil {
+			outNames = append(outNames, name.String()+" = "+fe.InitValues[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
+	}
+	out.WriteString(strings.Join(outNames, ", "))
+
+	out.WriteString("; ")
+	out.WriteString(fe.Condition.String())
+	out.WriteString("; ")
+	out.WriteString(fe.ChangeOf.String())
+	out.WriteString(") ")
+	out.WriteString(fe.Consequence.String())
+
+	return out.String()
+}
+
+// ForInExpression ...
+type ForInExpression struct {
+	Token        token.Token // for
+	Element      *Identifier
+	ArrayElement Expression
+	Consequence  *BlockStatement
+}
+
+func (fie *ForInExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (fie *ForInExpression) TokenLiteral() string {
+	return fie.Token.Literal
+}
+
+// String ...
+func (fie *ForInExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(fie.TokenLiteral())
+	out.WriteString(" (")
+	out.WriteString(fie.Element.String())
+	out.WriteString(" in ")
+	out.WriteString(fie.ArrayElement.String())
+	out.WriteString(") ")
+	out.WriteString(fie.Consequence.String())
+
+	return out.String()
+}
+
 // WhileExpression ...
 type WhileExpression struct {
 	Token       token.Token // while

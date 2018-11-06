@@ -101,6 +101,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
 	p.registerPrefix(token.While, p.parseWhileExpression)
+	p.registerPrefix(token.For, p.parseForExpression)
 	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
 	p.registerPrefix(token.BackQuotes, p.parseBackQuotesCallExpression)
 
@@ -185,7 +186,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
-		p.noPrefixParseFnError(p.curToken.Type)
+		p.noPrefixParseFnError(p.curToken)
 		return nil
 	}
 	leftExp := prefix()
@@ -623,6 +624,78 @@ func (p *Parser) parseTypeDeclaration() *ast.TypeDeclaration {
 	return nil
 }
 
+func (p *Parser) parseForExpression() ast.Expression {
+	forToken := p.curToken
+
+	if !p.expectPeek(token.Lparen) {
+		return nil
+	}
+
+	p.nextToken()
+	names, values := p.parseBulkDefinition()
+	p.nextToken()
+
+	if p.curTokenIs(token.Semicolon) {
+		p.nextToken()
+
+		exp := &ast.ForExpression{
+			Token:      forToken,
+			InitNames:  names,
+			InitValues: values,
+			Condition:  p.parseExpression(LOWEST),
+		}
+
+		if !p.expectPeek(token.Semicolon) {
+			return nil
+		}
+
+		p.nextToken()
+		exp.ChangeOf = p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.Rparen) {
+			return nil
+		}
+
+		p.nextToken()
+		if p.curTokenIs(token.Lbrace) {
+			exp.Consequence = p.parseBlockStatement()
+		} else {
+			exp.Consequence = p.parseSingleBlockStatement()
+		}
+
+		return exp
+
+	} else if p.curTokenIs(token.In) {
+		p.nextToken()
+		ident, ok := names[0].(*ast.Identifier)
+		if !ok {
+			return nil
+		}
+
+		exp := &ast.ForInExpression{
+			Token:        forToken,
+			Element:      ident,
+			ArrayElement: p.parseExpression(LOWEST),
+		}
+
+		if !p.expectPeek(token.Rparen) {
+			return nil
+		}
+
+		p.nextToken()
+		if p.curTokenIs(token.Lbrace) {
+			exp.Consequence = p.parseBlockStatement()
+		} else {
+			exp.Consequence = p.parseSingleBlockStatement()
+		}
+
+		return exp
+
+	} else {
+		return nil
+	}
+}
+
 func (p *Parser) parseWhileExpression() ast.Expression {
 	expression := &ast.WhileExpression{Token: p.curToken}
 
@@ -870,8 +943,9 @@ func (p *Parser) registerTernary(tokenType token.Type, fn ternaryParseFn) {
 	p.ternaryParseFns[tokenType] = fn
 }
 
-func (p *Parser) noPrefixParseFnError(t token.Type) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+func (p *Parser) noPrefixParseFnError(t token.Token) {
+	msg := fmt.Sprintf("line:%d.%d no prefix parse function for %s found.",
+		t.Row, t.Column, t.Type)
 	p.errors = append(p.errors, msg)
 }
 
