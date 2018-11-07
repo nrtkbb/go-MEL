@@ -732,12 +732,12 @@ type BreakStatement struct {
 
 func (bs *BreakStatement) statementNode() {}
 
-// TokenLiteral
+// TokenLiteral ...
 func (bs *BreakStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
 
-// String
+// String ...
 func (bs *BreakStatement) String() string {
 	return bs.Token.Literal + ";"
 }
@@ -749,12 +749,12 @@ type ContinueStatement struct {
 
 func (bs *ContinueStatement) statementNode() {}
 
-// TokenLiteral
+// TokenLiteral ...
 func (bs *ContinueStatement) TokenLiteral() string {
 	return bs.Token.Literal
 }
 
-// String
+// String ...
 func (bs *ContinueStatement) String() string {
 	return bs.Token.Literal + ";"
 }
