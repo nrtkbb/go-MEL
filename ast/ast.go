@@ -725,6 +725,40 @@ func (i *Identifier) String() string {
 	return i.Value
 }
 
+// BreakStatement ...
+type BreakStatement struct {
+	Token token.Token // token.Break
+}
+
+func (bs *BreakStatement) statementNode() {}
+
+// TokenLiteral
+func (bs *BreakStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+// String
+func (bs *BreakStatement) String() string {
+	return bs.Token.Literal + ";"
+}
+
+// ContinueStatement ...
+type ContinueStatement struct {
+	Token token.Token // token.Break
+}
+
+func (bs *ContinueStatement) statementNode() {}
+
+// TokenLiteral
+func (bs *ContinueStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+// String
+func (bs *ContinueStatement) String() string {
+	return bs.Token.Literal + ";"
+}
+
 // ReturnStatement ...
 type ReturnStatement struct {
 	Token       token.Token // token.Return

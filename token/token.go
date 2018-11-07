@@ -78,6 +78,8 @@ const (
 	If        = "If"
 	While     = "While"
 	Do        = "Do"
+	Break     = "Break"
+	Continue  = "Continue"
 	For       = "For"
 	In        = "In"
 	Else      = "Else"
@@ -85,25 +87,27 @@ const (
 )
 
 var keywords = map[string]Type{
-	"global": Global,
-	"proc":   Proc,
-	"string": StringDec,
-	"int":    IntDec,
-	"float":  FloatDec,
-	"vector": VectorDec,
-	"matrix": MatrixDec,
-	"true":   True,
-	"false":  False,
-	"on":     On,
-	"off":    Off,
-	"bool":   BoolDec,
-	"if":     If,
-	"while":  While,
-	"do":     Do,
-	"for":    For,
-	"in":     In,
-	"else":   Else,
-	"return": Return,
+	"global":   Global,
+	"proc":     Proc,
+	"string":   StringDec,
+	"int":      IntDec,
+	"float":    FloatDec,
+	"vector":   VectorDec,
+	"matrix":   MatrixDec,
+	"true":     True,
+	"false":    False,
+	"on":       On,
+	"off":      Off,
+	"bool":     BoolDec,
+	"if":       If,
+	"while":    While,
+	"do":       Do,
+	"break":    Break,
+	"continue": Continue,
+	"for":      For,
+	"in":       In,
+	"else":     Else,
+	"return":   Return,
 }
 
 // LookupIdent ...

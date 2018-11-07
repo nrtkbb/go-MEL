@@ -8,6 +8,46 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestParsingContinueStatement(t *testing.T) {
+	input := "continue;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) does not 1. got=%d",
+			len(program.Statements))
+	}
+
+	_, ok := program.Statements[0].(*ast.ContinueStatement)
+	if !ok {
+		t.Fatalf("program.Statemtns[0] does not *ast.ContinueStatement. got=%T",
+			program.Statements[0])
+	}
+}
+
+func TestParsingBreakStatement(t *testing.T) {
+	input := "break;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) does not 1. got=%d",
+			len(program.Statements))
+	}
+
+	_, ok := program.Statements[0].(*ast.BreakStatement)
+	if !ok {
+		t.Fatalf("program.Statemtns[0] does not *ast.BreakStatemnt. got=%T",
+			program.Statements[0])
+	}
+}
+
 func TestParsingIndexExpressions(t *testing.T) {
 	input := "$myArray[1 + 1]"
 

@@ -165,6 +165,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVectorStatement()
 	case token.MatrixDec:
 		return p.parseMatrixStatement()
+	case token.Break:
+		return p.parseBreakStatement()
+	case token.Continue:
+		return p.parseContinueStatement()
 	case token.Return:
 		return p.parseReturnStatement()
 	default:
@@ -508,6 +512,26 @@ func (p *Parser) parseBulkDefinition() ([]ast.Expression, []ast.Expression) {
 	}
 
 	return names, values
+}
+
+func (p *Parser) parseBreakStatement() ast.Statement {
+	stmt := &ast.BreakStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseContinueStatement() ast.Statement {
+	stmt := &ast.ContinueStatement{Token: p.curToken}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseReturnStatement() ast.Statement {
