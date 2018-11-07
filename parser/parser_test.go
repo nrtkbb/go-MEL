@@ -334,6 +334,62 @@ func TestForExpressionSingleBlock(t *testing.T) {
 	return
 }
 
+func TestDoWhileExpression(t *testing.T) {
+	inputs := []string{
+		`
+do {
+    string $x = "x";
+} while ($x < $y);`,
+		`
+do
+    string $x = "x";
+while ($x < $y);`,
+	}
+
+	for _, input := range inputs {
+		l := lexer.New(input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+				1, len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+				program.Statements[0])
+		}
+
+		exp, ok := stmt.Expression.(*ast.DoWhileExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression is not ast.DoWhileExpression. got=%T\n",
+				stmt.Expression)
+		}
+
+		if !testInfixExpression(t, exp.Condition, "$x", "<", "$y") {
+			return
+		}
+
+		consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
+		if !ok {
+			t.Fatalf("Statements[0] is not ast.StringStatement, got=%T\n",
+				exp.Consequence.Statements[0])
+		}
+
+		if !testStringStatement(t, consequence, "$x") {
+			return
+		}
+
+		val := consequence.Values[0]
+		if !testStringLiteral(t, val, `"x"`) {
+			return
+		}
+	}
+}
+
 func TestWhileExpressionSingleBlock(t *testing.T) {
 	input := `while ($x < $y) string $x = "x";`
 

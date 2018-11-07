@@ -359,6 +359,34 @@ func (fie *ForInExpression) String() string {
 	return out.String()
 }
 
+// DoWhileExpression ...
+type DoWhileExpression struct {
+	Token       token.Token // do
+	Condition   Expression
+	Consequence *BlockStatement
+}
+
+func (dwe *DoWhileExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (dwe *DoWhileExpression) TokenLiteral() string {
+	return dwe.Token.Literal
+}
+
+// String ...
+func (dwe *DoWhileExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(dwe.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(dwe.Consequence.String())
+	out.WriteString(" while ")
+	out.WriteString(dwe.Condition.String())
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // WhileExpression ...
 type WhileExpression struct {
 	Token       token.Token // while

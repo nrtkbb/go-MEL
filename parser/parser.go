@@ -101,6 +101,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
 	p.registerPrefix(token.While, p.parseWhileExpression)
+	p.registerPrefix(token.Do, p.parseDoWhileExpression)
 	p.registerPrefix(token.For, p.parseForExpression)
 	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
 	p.registerPrefix(token.BackQuotes, p.parseBackQuotesCallExpression)
@@ -694,6 +695,34 @@ func (p *Parser) parseForExpression() ast.Expression {
 	} else {
 		return nil
 	}
+}
+
+func (p *Parser) parseDoWhileExpression() ast.Expression {
+	expression := &ast.DoWhileExpression{Token: p.curToken}
+
+	p.nextToken()
+	if p.curTokenIs(token.Lbrace) {
+		expression.Consequence = p.parseBlockStatement()
+	} else {
+		expression.Consequence = p.parseSingleBlockStatement()
+	}
+
+	if !p.expectPeek(token.While) {
+		return nil
+	}
+
+	if !p.expectPeek(token.Lparen) {
+		return nil
+	}
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.Rparen) {
+		return nil
+	}
+
+	return expression
 }
 
 func (p *Parser) parseWhileExpression() ast.Expression {

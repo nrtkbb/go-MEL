@@ -77,6 +77,7 @@ const (
 	BoolDec   = "BoolDec"
 	If        = "If"
 	While     = "While"
+	Do        = "Do"
 	For       = "For"
 	In        = "In"
 	Else      = "Else"
@@ -98,6 +99,7 @@ var keywords = map[string]Type{
 	"bool":   BoolDec,
 	"if":     If,
 	"while":  While,
+	"do":     Do,
 	"for":    For,
 	"in":     In,
 	"else":   Else,
