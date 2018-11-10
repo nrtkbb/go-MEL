@@ -501,8 +501,12 @@ func (se *SwitchExpression) String() string {
 	out.WriteString(se.Condition.String())
 	out.WriteString(" {")
 	for i, cas := range se.Cases {
-		out.WriteString("case ")
-		out.WriteString(cas.String())
+		if cas != nil {
+			out.WriteString("case ")
+			out.WriteString(cas.String())
+		} else {
+			out.WriteString("default")
+		}
 		out.WriteString(se.CaseStatements[i].String())
 	}
 	out.WriteString(" }")
