@@ -866,7 +866,6 @@ func (p *Parser) parseSwitchExpression() ast.Expression {
 	for p.peekTokenIs(token.Case) {
 		p.nextToken()
 		p.nextToken()
-		fmt.Println("case in ", p.curToken)
 
 		litExp := p.parseExpression(LOWEST)
 		literal, ok := litExp.(ast.Literal)
@@ -875,8 +874,6 @@ func (p *Parser) parseSwitchExpression() ast.Expression {
 		}
 		exp.Cases = append(exp.Cases, literal)
 
-		fmt.Println("case literal is ", literal.String(), p.curToken)
-
 		if !p.expectPeek(token.Coron) {
 			return nil
 		}
@@ -884,7 +881,6 @@ func (p *Parser) parseSwitchExpression() ast.Expression {
 	}
 
 	if p.peekTokenIs(token.Default) {
-		fmt.Println("Default in ", p.curToken)
 		p.nextToken()
 		exp.Cases = append(exp.Cases, nil)
 		if !p.expectPeek(token.Coron) {
