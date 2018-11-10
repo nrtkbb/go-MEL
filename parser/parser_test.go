@@ -8,6 +8,61 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestSwitchStatement(t *testing.T) {
+	input := `
+switch ($x + 1) {
+	case 1:
+		string $x = "x";
+		break;
+	default:
+		string $y = "y";
+		break;
+}
+`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) does not 1. got=%d",
+			len(program.Statements))
+	}
+
+	exp, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statemtns[0] does not *ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	se, ok := exp.Expression.(*ast.SwitchExpression)
+	if !ok {
+		t.Fatalf("exp.Expression does not *ast.SwitchExpression. got=%T",
+			exp.Expression)
+	}
+
+	if !testInfixExpression(t, se.Condition, "$x", "+", 1) {
+		return
+	}
+
+	if len(se.Cases) != 2 {
+		t.Fatalf("len(se.Cases) is not 2. got=%d", len(se.Cases))
+	}
+
+	if len(se.CaseStatements) != 2 {
+		t.Fatalf("len(se.CaseStatements) is not 2. got=%d", len(se.CaseStatements))
+	}
+
+	if !testLiteralExpression(t, se.Cases[0], 1) {
+		return
+	}
+
+	if se.Cases[1] != nil {
+		t.Fatalf("se.Cases[1] is not nil. got=%q", se.Cases[1])
+	}
+}
+
 func TestParsingContinueStatement(t *testing.T) {
 	input := "continue;"
 
@@ -1647,9 +1702,9 @@ func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
 }
 
 func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
-	bo, ok := exp.(*ast.Boolean)
+	bo, ok := exp.(*ast.BooleanLiteral)
 	if !ok {
-		t.Errorf("exp not *ast.Boolean. got=%T", exp)
+		t.Errorf("exp not *ast.BooleanLiteral. got=%T", exp)
 		return false
 	}
 

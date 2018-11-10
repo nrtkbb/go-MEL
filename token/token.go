@@ -78,6 +78,9 @@ const (
 	If        = "If"
 	While     = "While"
 	Do        = "Do"
+	Switch    = "Switch"
+	Case      = "Case"
+	Default   = "Default"
 	Break     = "Break"
 	Continue  = "Continue"
 	For       = "For"
@@ -102,6 +105,9 @@ var keywords = map[string]Type{
 	"if":       If,
 	"while":    While,
 	"do":       Do,
+	"switch":   Switch,
+	"case":     Case,
+	"default":  Default,
 	"break":    Break,
 	"continue": Continue,
 	"for":      For,

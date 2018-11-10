@@ -25,6 +25,12 @@ type Expression interface {
 	expressionNode()
 }
 
+// Literal ...
+type Literal interface {
+	Expression
+	literalNode()
+}
+
 // Program is represent the entire program
 type Program struct {
 	Statements []Statement
@@ -471,6 +477,64 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
+// SwitchExpression ...
+type SwitchExpression struct {
+	Token          token.Token // switch
+	Condition      Expression
+	Cases          []Literal
+	CaseStatements []*CaseStatement
+}
+
+func (se *SwitchExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (se *SwitchExpression) TokenLiteral() string {
+	return se.Token.Literal
+}
+
+// String ...
+func (se *SwitchExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(se.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(se.Condition.String())
+	out.WriteString(" {")
+	for i, cas := range se.Cases {
+		out.WriteString("case ")
+		out.WriteString(cas.String())
+		out.WriteString(se.CaseStatements[i].String())
+	}
+	out.WriteString(" }")
+
+	return out.String()
+}
+
+// CaseStatement ...
+type CaseStatement struct {
+	Token      token.Token // ':' token
+	Statements []Statement
+}
+
+func (cs *CaseStatement) statementNode() {}
+
+// TokenLiteral ...
+func (cs *CaseStatement) TokenLiteral() string {
+	return cs.Token.Literal
+}
+
+// String ...
+func (cs *CaseStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(cs.TokenLiteral())
+	for _, stmt := range cs.Statements {
+		out.WriteString(stmt.String())
+	}
+
+	return out.String()
+}
+
 // VectorStatement ...
 type VectorStatement struct {
 	Token  token.Token // token.VectorDec
@@ -658,6 +722,7 @@ type ArrayLiteral struct {
 }
 
 func (al *ArrayLiteral) expressionNode() {}
+func (al *ArrayLiteral) literalNode()    {}
 
 // TokenLiteral ...
 func (al *ArrayLiteral) TokenLiteral() string {
@@ -795,6 +860,7 @@ type IntegerLiteral struct {
 }
 
 func (il *IntegerLiteral) expressionNode() {}
+func (il *IntegerLiteral) literalNode()    {}
 
 // TokenLiteral ...
 func (il *IntegerLiteral) TokenLiteral() string {
@@ -813,6 +879,7 @@ type FloatLiteral struct {
 }
 
 func (fl *FloatLiteral) expressionNode() {}
+func (fl *FloatLiteral) literalNode()    {}
 
 // TokenLiteral ...
 func (fl *FloatLiteral) TokenLiteral() string {
@@ -831,6 +898,7 @@ type StringLiteral struct {
 }
 
 func (sl *StringLiteral) expressionNode() {}
+func (sl *StringLiteral) literalNode()    {}
 
 // TokenLiteral ...
 func (sl *StringLiteral) TokenLiteral() string {
@@ -842,21 +910,22 @@ func (sl *StringLiteral) String() string {
 	return sl.Token.Literal
 }
 
-// Boolean ...
-type Boolean struct {
+// BooleanLiteral ...
+type BooleanLiteral struct {
 	Token token.Token // true or false
 	Value bool
 }
 
-func (b *Boolean) expressionNode() {}
+func (b *BooleanLiteral) expressionNode() {}
+func (b *BooleanLiteral) literalNode()    {}
 
 // TokenLiteral ...
-func (b *Boolean) TokenLiteral() string {
+func (b *BooleanLiteral) TokenLiteral() string {
 	return b.Token.Literal
 }
 
 // String ...
-func (b *Boolean) String() string {
+func (b *BooleanLiteral) String() string {
 	return b.Token.Literal
 }
 
@@ -867,6 +936,7 @@ type TensorLiteral struct {
 }
 
 func (vl *TensorLiteral) expressionNode() {}
+func (vl *TensorLiteral) literalNode()    {}
 
 // TokenLiteral ...
 func (vl *TensorLiteral) TokenLiteral() string {

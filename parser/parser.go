@@ -92,14 +92,15 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Minus, p.parsePrefixExpression)
 	p.registerPrefix(token.Decrement, p.parsePrefixExpression)
 	p.registerPrefix(token.Increment, p.parsePrefixExpression)
-	p.registerPrefix(token.True, p.parseBoolean)
-	p.registerPrefix(token.False, p.parseBoolean)
-	p.registerPrefix(token.On, p.parseBoolean)
-	p.registerPrefix(token.Off, p.parseBoolean)
+	p.registerPrefix(token.True, p.parseBooleanLiteral)
+	p.registerPrefix(token.False, p.parseBooleanLiteral)
+	p.registerPrefix(token.On, p.parseBooleanLiteral)
+	p.registerPrefix(token.Off, p.parseBooleanLiteral)
 	p.registerPrefix(token.Ltensor, p.parseTensorLiteral)
 	p.registerPrefix(token.Lbrace, p.parseArrayLiteral)
 	p.registerPrefix(token.Lparen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Switch, p.parseSwitchExpression)
 	p.registerPrefix(token.While, p.parseWhileExpression)
 	p.registerPrefix(token.Do, p.parseDoWhileExpression)
 	p.registerPrefix(token.For, p.parseForExpression)
@@ -845,6 +846,74 @@ func (p *Parser) parseSingleBlockStatement() *ast.BlockStatement {
 	return block
 }
 
+func (p *Parser) parseSwitchExpression() ast.Expression {
+	exp := &ast.SwitchExpression{Token: p.curToken}
+
+	if !p.expectPeek(token.Lparen) {
+		return nil
+	}
+
+	p.nextToken()
+	exp.Condition = p.parseExpression(LOWEST)
+	if !p.expectPeek(token.Rparen) {
+		return nil
+	}
+
+	if !p.expectPeek(token.Lbrace) {
+		return nil
+	}
+
+	for p.peekTokenIs(token.Case) {
+		p.nextToken()
+		p.nextToken()
+		fmt.Println("case in ", p.curToken)
+
+		litExp := p.parseExpression(LOWEST)
+		literal, ok := litExp.(ast.Literal)
+		if !ok {
+			return nil
+		}
+		exp.Cases = append(exp.Cases, literal)
+
+		fmt.Println("case literal is ", literal.String(), p.curToken)
+
+		if !p.expectPeek(token.Coron) {
+			return nil
+		}
+		exp.CaseStatements = append(exp.CaseStatements, p.parseCaseStatement())
+	}
+
+	if p.peekTokenIs(token.Default) {
+		fmt.Println("Default in ", p.curToken)
+		p.nextToken()
+		exp.Cases = append(exp.Cases, nil)
+		if !p.expectPeek(token.Coron) {
+			return nil
+		}
+		exp.CaseStatements = append(exp.CaseStatements, p.parseCaseStatement())
+	}
+
+	if !p.expectPeek(token.Rbrace) {
+		return nil
+	}
+
+	return exp
+}
+
+func (p *Parser) parseCaseStatement() *ast.CaseStatement {
+	stmt := &ast.CaseStatement{Token: p.curToken}
+
+	for !p.peekTokenIs(token.Case) &&
+		!p.peekTokenIs(token.Default) &&
+		!p.peekTokenIs(token.Rbrace) &&
+		!p.peekTokenIs(token.EOF) {
+		p.nextToken()
+		stmt.Statements = append(stmt.Statements, p.parseStatement())
+	}
+
+	return stmt
+}
+
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
@@ -948,8 +1017,8 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 	return list
 }
 
-func (p *Parser) parseBoolean() ast.Expression {
-	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.True)}
+func (p *Parser) parseBooleanLiteral() ast.Expression {
+	return &ast.BooleanLiteral{Token: p.curToken, Value: p.curTokenIs(token.True)}
 }
 
 func (p *Parser) nextToken() {
