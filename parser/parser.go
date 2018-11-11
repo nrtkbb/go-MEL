@@ -155,6 +155,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
+	case token.Global:
+		return p.parseGlobalStatement()
 	case token.Proc:
 		return p.parseProcStatement()
 	case token.StringDec:
@@ -573,6 +575,18 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseGlobalStatement() ast.Statement {
+	gs := &ast.GlobalStatement{Token: p.curToken}
+
+	p.nextToken()
+	gs.Statement = p.parseStatement()
+	if gs.Statement == nil {
+		return nil
+	}
+
+	return gs
 }
 
 func (p *Parser) parseProcStatement() ast.Statement {

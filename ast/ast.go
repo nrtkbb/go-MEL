@@ -469,6 +469,30 @@ func (se *SwitchExpression) String() string {
 	return out.String()
 }
 
+// GlobalStatement ...
+type GlobalStatement struct {
+	Token     token.Token // global
+	Statement Statement
+}
+
+func (gs *GlobalStatement) statementNode() {}
+
+// TokenLiteral ...
+func (gs *GlobalStatement) TokenLiteral() string {
+	return gs.Token.Literal
+}
+
+// String ...
+func (gs *GlobalStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(gs.TokenLiteral())
+	out.WriteString(" ")
+	out.WriteString(gs.Statement.String())
+
+	return out.String()
+}
+
 // ProcStatement ...
 type ProcStatement struct {
 	Token      token.Token // proc

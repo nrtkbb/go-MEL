@@ -265,6 +265,60 @@ func TestCallExpressionParsing(t *testing.T) {
 	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
 }
 
+func TestGlobalStatementParsing(t *testing.T) {
+	input := `
+global proc Proc(string $x, string $y) {
+    $x + $y;
+}`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements, got=%d\n",
+			1, len(program.Statements))
+	}
+
+	gs, ok := program.Statements[0].(*ast.GlobalStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.GlobalStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	stmt, ok := gs.Statement.(*ast.ProcStatement)
+	if !ok {
+		t.Fatalf("gs.Statement is not ast.ProcStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	if stmt.Name.Literal != "Proc" {
+		t.Fatalf("function name is not %s. got=%s\n",
+			"Proc", stmt.Name.Literal)
+	}
+
+	if len(stmt.Parameters) != 2 {
+		t.Fatalf("function literal parameters wrong, want 2, got=%d\n",
+			len(stmt.Parameters))
+	}
+
+	testLiteralExpression(t, stmt.Parameters[0], "$x")
+	testLiteralExpression(t, stmt.Parameters[1], "$y")
+
+	if len(stmt.Body.Statements) != 1 {
+		t.Fatalf("function.Body.Statements has not 1 statements. got=%d\n",
+			len(stmt.Body.Statements))
+	}
+
+	bodyStmt, ok := stmt.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("function body stmt is not ast.ExressionStatement. got=%T\n",
+			stmt.Body.Statements[0])
+	}
+
+	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
+}
+
 func TestFunctionLiteralParsing(t *testing.T) {
 	input := `
 proc Proc(string $x, string $y) {
