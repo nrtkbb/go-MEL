@@ -246,51 +246,6 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
-// FunctionLiteral ...
-type FunctionLiteral struct {
-	Token      token.Token // proc
-	Name       token.Token // ProcIdent
-	IsGlobal   bool
-	ReturnType *TypeDeclaration
-	ParamTypes []*TypeDeclaration
-	Parameters []*Identifier
-	Body       *BlockStatement
-}
-
-func (fl *FunctionLiteral) expressionNode() {}
-
-// TokenLiteral ...
-func (fl *FunctionLiteral) TokenLiteral() string {
-	return fl.Token.Literal
-}
-
-// String ...
-func (fl *FunctionLiteral) String() string {
-	var out bytes.Buffer
-
-	if fl.IsGlobal {
-		out.WriteString("global ")
-	}
-
-	out.WriteString(fl.TokenLiteral() + " ")
-
-	if fl.ReturnType != nil {
-		out.WriteString(fl.ReturnType.String() + " ")
-	}
-
-	var params []string
-	for _, p := range fl.Parameters {
-		params = append(params, p.String())
-	}
-
-	out.WriteString("(")
-	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(")")
-	out.WriteString(fl.Body.String())
-
-	return out.String()
-}
-
 // ForExpression ...
 type ForExpression struct {
 	Token       token.Token // for
@@ -510,6 +465,46 @@ func (se *SwitchExpression) String() string {
 		out.WriteString(se.CaseStatements[i].String())
 	}
 	out.WriteString(" }")
+
+	return out.String()
+}
+
+// ProcStatement ...
+type ProcStatement struct {
+	Token      token.Token // proc
+	Name       token.Token // ProcIdent
+	ReturnType *TypeDeclaration
+	ParamTypes []*TypeDeclaration
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fl *ProcStatement) statementNode() {}
+
+// TokenLiteral ...
+func (fl *ProcStatement) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+// String ...
+func (fl *ProcStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(fl.TokenLiteral() + " ")
+
+	if fl.ReturnType != nil {
+		out.WriteString(fl.ReturnType.String() + " ")
+	}
+
+	var params []string
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(")")
+	out.WriteString(fl.Body.String())
 
 	return out.String()
 }

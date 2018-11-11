@@ -104,7 +104,6 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.While, p.parseWhileExpression)
 	p.registerPrefix(token.Do, p.parseDoWhileExpression)
 	p.registerPrefix(token.For, p.parseForExpression)
-	p.registerPrefix(token.Proc, p.parseFunctionLiteral)
 	p.registerPrefix(token.BackQuotes, p.parseBackQuotesCallExpression)
 
 	// set infix parse func.
@@ -156,6 +155,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
+	case token.Proc:
+		return p.parseProcStatement()
 	case token.StringDec:
 		return p.parseStringStatement()
 	case token.IntDec:
@@ -574,8 +575,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseFunctionLiteral() ast.Expression {
-	lit := &ast.FunctionLiteral{Token: p.curToken}
+func (p *Parser) parseProcStatement() ast.Statement {
+	lit := &ast.ProcStatement{Token: p.curToken}
 
 	lit.ReturnType = p.parseTypeDeclaration()
 
@@ -590,7 +591,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		return nil
 	}
 
-	lit.ParamTypes, lit.Parameters = p.parseFunctionParameters()
+	lit.ParamTypes, lit.Parameters = p.parseProcParameters()
 
 	if !p.expectPeek(token.Lbrace) {
 		return nil
@@ -601,7 +602,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	return lit
 }
 
-func (p *Parser) parseFunctionParameters() ([]*ast.TypeDeclaration, []*ast.Identifier) {
+func (p *Parser) parseProcParameters() ([]*ast.TypeDeclaration, []*ast.Identifier) {
 	var typeDeclarations []*ast.TypeDeclaration
 	var identifiers []*ast.Identifier
 
