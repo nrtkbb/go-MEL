@@ -295,7 +295,11 @@ func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expressi
 // like this:
 //   add 1 (2 + 3) a "b";
 func (p *Parser) parseCommandCallExpression(function ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	ident, ok := function.(*ast.Identifier)
+	if !ok {
+		return nil
+	}
+	exp := &ast.CallExpression{Token: p.curToken, Function: ident}
 
 	preCommandMode := p.commandStyleMode
 	p.commandStyleMode = true
@@ -336,7 +340,12 @@ func (p *Parser) parseBackQuotesCallExpression() ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken}
 	if p.peekTokenIs(token.ProcIdent) {
 		p.nextToken()
-		exp.Function = p.parseIdentifier()
+		identExp := p.parseIdentifier()
+		ident, ok := identExp.(*ast.Identifier)
+		if !ok {
+			return nil
+		}
+		exp.Function = ident
 	} else {
 		return nil
 	}
@@ -377,7 +386,11 @@ func (p *Parser) parseBackQuotesCallArguments() []ast.Expression {
 // like this:
 //   add(1, (2 + 3), "a", "b");
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	ident, ok := function.(*ast.Identifier)
+	if !ok {
+		return nil
+	}
+	exp := &ast.CallExpression{Token: p.curToken, Function: ident}
 	exp.Arguments = p.parseExpressionList(token.Rparen)
 	return exp
 }

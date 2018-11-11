@@ -218,7 +218,7 @@ func (td *TypeDeclaration) String() string {
 // CallExpression ...
 type CallExpression struct {
 	Token     token.Token // '(' token or '`' token or function
-	Function  Expression  // Identifier or FunctionLiteral
+	Function  *Identifier // Identifier
 	Arguments []Expression
 }
 
