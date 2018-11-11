@@ -319,7 +319,7 @@ global proc Proc(string $x, string $y) {
 	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
 }
 
-func TestFunctionLiteralParsing(t *testing.T) {
+func TestProcStatementParsing(t *testing.T) {
 	input := `
 proc Proc(string $x, string $y) {
 	$x + $y;
@@ -336,17 +336,17 @@ proc Proc(string $x, string $y) {
 
 	stmt, ok := program.Statements[0].(*ast.ProcStatement)
 	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+		t.Fatalf("program.Statements[0] is not ast.ProcStatement. got=%T\n",
 			program.Statements[0])
 	}
 
 	if stmt.Name.Literal != "Proc" {
-		t.Fatalf("function name is not %s. got=%s\n",
+		t.Fatalf("proc name is not %s. got=%s\n",
 			"Proc", stmt.Name.Literal)
 	}
 
 	if len(stmt.Parameters) != 2 {
-		t.Fatalf("function literal parameters wrong, want 2, got=%d\n",
+		t.Fatalf("proc statement parameters wrong, want 2, got=%d\n",
 			len(stmt.Parameters))
 	}
 
@@ -354,13 +354,13 @@ proc Proc(string $x, string $y) {
 	testLiteralExpression(t, stmt.Parameters[1], "$y")
 
 	if len(stmt.Body.Statements) != 1 {
-		t.Fatalf("function.Body.Statements has not 1 statements. got=%d\n",
+		t.Fatalf("stmt.Body.Statements has not 1 statements. got=%d\n",
 			len(stmt.Body.Statements))
 	}
 
 	bodyStmt, ok := stmt.Body.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("function body stmt is not ast.ExressionStatement. got=%T\n",
+		t.Fatalf("stmt body stmt is not ast.ExressionStatement. got=%T\n",
 			stmt.Body.Statements[0])
 	}
 
