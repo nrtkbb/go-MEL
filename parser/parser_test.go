@@ -8,6 +8,22 @@ import (
 	"github.com/nrtkbb/go-MEL/lexer"
 )
 
+func TestCommentParsing(t *testing.T) {
+	input := `// test
+/*
+	test test
+*/`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 0 {
+		t.Fatalf("len(program.Statements) does not 0. got=%d",
+			len(program.Statements))
+	}
+}
+
 func TestSwitchStatement(t *testing.T) {
 	input := `
 switch ($x + 1) {

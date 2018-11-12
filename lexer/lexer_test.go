@@ -191,28 +191,12 @@ func TestCommentToken(t *testing.T) {
 // test
 /* test */
 `
-	tests := []struct {
-		expectedType    token.Type
-		expectedLiteral string
-	}{
-		{token.Comment, " test"},
-		{token.Comment, " test "},
-	}
 
 	l := New(input)
+	tok := l.NextToken()
 
-	for i, tt := range tests {
-		tok := l.NextToken()
-
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
-				i, tt.expectedType, tok.Type, tok.Literal)
-		}
-
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
-		}
+	if tok.Type != token.EOF {
+		t.Fatalf("input is not EOF. got=%T", tok.Type)
 	}
 }
 

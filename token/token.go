@@ -29,8 +29,6 @@ const (
 	False     = "False"
 	Off       = "Off"
 
-	Comment = "Comment" // // ...
-
 	// 演算子
 	Assign   = "="
 	Plus     = "+"
