@@ -1072,6 +1072,13 @@ func TestMatrixStatement2(t *testing.T) {
 				return
 			}
 		}
+
+		for i, assign := range stmt.(*ast.MatrixStatement).Assigns {
+			if assign.Literal != "=" {
+				t.Fatalf("stmt.Assigns[%d] is not =. got=%s",
+					i, assign.Literal)
+			}
+		}
 	}
 }
 
@@ -1114,6 +1121,13 @@ func TestVectorStatement2(t *testing.T) {
 				return
 			}
 		}
+
+		for i, assign := range stmt.(*ast.VectorStatement).Assigns {
+			if assign.Literal != "=" {
+				t.Fatalf("stmt.Assigns[%d] is not =. got=%s",
+					i, assign.Literal)
+			}
+		}
 	}
 }
 
@@ -1147,6 +1161,13 @@ func TestFloatStatement(t *testing.T) {
 		val := stmt.(*ast.FloatStatement).Values[0]
 		if !testLiteralExpression(t, val, tt.expectedValue) {
 			return
+		}
+
+		for i, assign := range stmt.(*ast.FloatStatement).Assigns {
+			if assign.Literal != "=" {
+				t.Fatalf("stmt.Assigns[%d] is not =. got=%s",
+					i, assign.Literal)
+			}
 		}
 	}
 }
@@ -1188,6 +1209,13 @@ func TestIntegerStatement2(t *testing.T) {
 		for i, val := range vals {
 			if !testLiteralExpression(t, val, tt.expectedValues[i]) {
 				return
+			}
+		}
+
+		for i, assign := range stmt.(*ast.IntegerStatement).Assigns {
+			if assign.Literal != "=" {
+				t.Fatalf("stmt.Assigns[%d] is not =. got=%s",
+					i, assign.Literal)
 			}
 		}
 	}
@@ -1264,6 +1292,13 @@ func TestStringStatement2(t *testing.T) {
 		for i, val := range vals {
 			if !testLiteralExpression(t, val, tt.expectedValues[i]) {
 				return
+			}
+		}
+
+		for i, assign := range stmt.(*ast.StringStatement).Assigns {
+			if assign.Literal != "=" {
+				t.Fatalf("stmt.Assigns[%d] is not =. got=%s",
+					i, assign.Literal)
 			}
 		}
 	}

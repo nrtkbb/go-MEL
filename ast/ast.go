@@ -250,6 +250,7 @@ func (ce *CallExpression) String() string {
 type ForExpression struct {
 	Token       token.Token // for
 	InitNames   []Expression
+	InitAssigns []token.Token
 	InitValues  []Expression
 	Condition   Expression
 	ChangeOf    Expression
@@ -273,7 +274,8 @@ func (fe *ForExpression) String() string {
 	var outNames []string
 	for i, name := range fe.InitNames {
 		if fe.InitValues[i] != nil {
-			outNames = append(outNames, name.String()+" = "+fe.InitValues[i].String())
+			outNames = append(outNames,
+				name.String()+" "+fe.InitAssigns[i].Literal+" "+fe.InitValues[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -560,9 +562,10 @@ func (cs *CaseStatement) String() string {
 
 // VectorStatement ...
 type VectorStatement struct {
-	Token  token.Token // token.VectorDec
-	Names  []Expression
-	Values []Expression
+	Token   token.Token // token.VectorDec
+	Names   []Expression
+	Assigns []token.Token
+	Values  []Expression
 }
 
 func (vs *VectorStatement) statementNode() {}
@@ -582,7 +585,8 @@ func (vs *VectorStatement) String() string {
 	var outNames []string
 	for i, name := range vs.Names {
 		if vs.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+vs.Values[i].String())
+			outNames = append(outNames,
+				name.String()+" "+vs.Assigns[i].Literal+" "+vs.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -596,9 +600,10 @@ func (vs *VectorStatement) String() string {
 
 // MatrixStatement ...
 type MatrixStatement struct {
-	Token  token.Token // token.MatrixDec
-	Names  []Expression
-	Values []Expression
+	Token   token.Token // token.MatrixDec
+	Names   []Expression
+	Assigns []token.Token
+	Values  []Expression
 }
 
 func (ms *MatrixStatement) statementNode() {}
@@ -618,7 +623,8 @@ func (ms *MatrixStatement) String() string {
 	var outNames []string
 	for i, name := range ms.Names {
 		if ms.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+ms.Values[i].String())
+			outNames = append(outNames,
+				name.String()+" "+ms.Assigns[i].Literal+" "+ms.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -632,9 +638,10 @@ func (ms *MatrixStatement) String() string {
 
 // IntegerStatement ...
 type IntegerStatement struct {
-	Token  token.Token // token.IntDec
-	Names  []Expression
-	Values []Expression
+	Token   token.Token // token.IntDec
+	Names   []Expression
+	Assigns []token.Token
+	Values  []Expression
 }
 
 func (is *IntegerStatement) statementNode() {}
@@ -654,7 +661,8 @@ func (is *IntegerStatement) String() string {
 	var outNames []string
 	for i, name := range is.Names {
 		if is.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+is.Values[i].String())
+			outNames = append(outNames,
+				name.String()+" "+is.Assigns[i].Literal+" "+is.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -668,9 +676,10 @@ func (is *IntegerStatement) String() string {
 
 // FloatStatement ...
 type FloatStatement struct {
-	Token  token.Token // token.FloatDec
-	Names  []Expression
-	Values []Expression
+	Token   token.Token // token.FloatDec
+	Names   []Expression
+	Assigns []token.Token
+	Values  []Expression
 }
 
 func (fs *FloatStatement) statementNode() {}
@@ -690,7 +699,8 @@ func (fs *FloatStatement) String() string {
 	var outNames []string
 	for i, name := range fs.Names {
 		if fs.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+fs.Values[i].String())
+			outNames = append(outNames,
+				name.String()+" "+fs.Assigns[i].Literal+" "+fs.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}
@@ -704,9 +714,10 @@ func (fs *FloatStatement) String() string {
 
 // StringStatement ...
 type StringStatement struct {
-	Token  token.Token // token.StringDec
-	Names  []Expression
-	Values []Expression
+	Token   token.Token // token.StringDec
+	Names   []Expression
+	Assigns []token.Token // token.Assign or token.?Assign
+	Values  []Expression
 }
 
 func (ss *StringStatement) statementNode() {}
@@ -726,7 +737,8 @@ func (ss *StringStatement) String() string {
 	var outNames []string
 	for i, name := range ss.Names {
 		if ss.Values[i] != nil {
-			outNames = append(outNames, name.String()+" = "+ss.Values[i].String())
+			outNames = append(outNames,
+				name.String()+" "+ss.Assigns[i].Literal+" "+ss.Values[i].String())
 		} else {
 			outNames = append(outNames, name.String())
 		}

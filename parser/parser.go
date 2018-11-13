@@ -423,7 +423,7 @@ func (p *Parser) parseMatrixStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Names, stmt.Values = p.parseBulkDefinition()
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -439,7 +439,7 @@ func (p *Parser) parseVectorStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Names, stmt.Values = p.parseBulkDefinition()
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -455,7 +455,7 @@ func (p *Parser) parseIntegerStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Names, stmt.Values = p.parseBulkDefinition()
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -471,7 +471,7 @@ func (p *Parser) parseFloatStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Names, stmt.Values = p.parseBulkDefinition()
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -487,7 +487,7 @@ func (p *Parser) parseStringStatement() ast.Statement {
 		return nil
 	}
 
-	stmt.Names, stmt.Values = p.parseBulkDefinition()
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -496,16 +496,25 @@ func (p *Parser) parseStringStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseBulkDefinition() ([]ast.Expression, []ast.Expression) {
+func (p *Parser) parseBulkDefinition() ([]ast.Expression, []token.Token, []ast.Expression) {
 	var names []ast.Expression
+	var assigns []token.Token
 	var values []ast.Expression
 
 	name := p.parseExpression(LOWEST)
 	names = append(names, name)
-	if !p.peekTokenIs(token.Assign) {
+	if !p.peekTokenIsAssign() {
 		values = append(values, nil)
+		assigns = append(assigns,
+			token.Token{
+				Type:    token.Assign,
+				Literal: "=",
+				Row:     p.curToken.Row,
+				Column:  p.curToken.Column,
+			})
 	} else {
 		p.nextToken()
+		assigns = append(assigns, p.curToken)
 		p.nextToken()
 		value := p.parseExpression(LOWEST)
 		values = append(values, value)
@@ -517,18 +526,36 @@ func (p *Parser) parseBulkDefinition() ([]ast.Expression, []ast.Expression) {
 		name := p.parseExpression(LOWEST)
 		names = append(names, name)
 
-		if !p.peekTokenIs(token.Assign) {
+		if !p.peekTokenIsAssign() {
 			values = append(values, nil)
+			assigns = append(assigns,
+				token.Token{
+					Type:    token.Assign,
+					Literal: "=",
+					Row:     p.curToken.Row,
+					Column:  p.curToken.Column,
+				})
 			continue
 		}
 		p.nextToken()
+		assigns = append(assigns, p.curToken)
 		p.nextToken()
-
 		value := p.parseExpression(LOWEST)
 		values = append(values, value)
 	}
 
-	return names, values
+	return names, assigns, values
+}
+
+func (p *Parser) peekTokenIsAssign() bool {
+	if p.peekToken.Type == token.Assign ||
+		p.peekToken.Type == token.PAssign ||
+		p.peekToken.Type == token.MAssign ||
+		p.peekToken.Type == token.AAssign ||
+		p.peekToken.Type == token.SAssign {
+		return true
+	}
+	return false
 }
 
 func (p *Parser) parseBreakStatement() ast.Statement {
@@ -686,17 +713,18 @@ func (p *Parser) parseForExpression() ast.Expression {
 	}
 
 	p.nextToken()
-	names, values := p.parseBulkDefinition()
+	names, assigns, values := p.parseBulkDefinition()
 	p.nextToken()
 
 	if p.curTokenIs(token.Semicolon) {
 		p.nextToken()
 
 		exp := &ast.ForExpression{
-			Token:      forToken,
-			InitNames:  names,
-			InitValues: values,
-			Condition:  p.parseExpression(LOWEST),
+			Token:       forToken,
+			InitNames:   names,
+			InitAssigns: assigns,
+			InitValues:  values,
+			Condition:   p.parseExpression(LOWEST),
 		}
 
 		if !p.expectPeek(token.Semicolon) {
