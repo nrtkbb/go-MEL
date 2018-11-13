@@ -80,7 +80,13 @@ func (l *Lexer) NextToken() token.Token {
 	case '>':
 		tok = l.peekRuneCheck('>', token.Rtensor, token.Gt)
 	case '+':
+		if '=' == l.peekRune() {
+			l.readNAssign(&tok, token.PAssign)
+			return tok
+		}
 		tok = l.peekRuneCheck('+', token.Increment, token.Plus)
+	case '*':
+		tok = l.peekRuneCheck('=', token.AAssign, token.Asterisk)
 	case '?':
 		tok = newToken(token.Question, l.rune, l.row, l.column)
 	case ':':
@@ -104,7 +110,10 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = newToken(token.Comma, l.rune, l.row, l.column)
 	case '-':
-		if 'a' <= l.peekRune() && l.peekRune() <= 'z' {
+		if '=' == l.peekRune() {
+			l.readNAssign(&tok, token.MAssign)
+			return tok
+		} else if 'a' <= l.peekRune() && l.peekRune() <= 'z' {
 			tok.Type = token.Flag
 			tok.Row = l.row
 			tok.Column = l.column
@@ -113,7 +122,10 @@ func (l *Lexer) NextToken() token.Token {
 		}
 		tok = l.peekRuneCheck('-', token.Decrement, token.Minus)
 	case '/':
-		if '/' == l.peekRune() {
+		if '=' == l.peekRune() {
+			l.readNAssign(&tok, token.SAssign)
+			return tok
+		} else if '/' == l.peekRune() {
 			l.readLineComment()
 			return l.NextToken()
 		} else if '*' == l.peekRune() {
@@ -121,8 +133,6 @@ func (l *Lexer) NextToken() token.Token {
 			return l.NextToken()
 		}
 		tok = newToken(token.Slash, l.rune, l.row, l.column)
-	case '*':
-		tok = newToken(token.Asterisk, l.rune, l.row, l.column)
 	case '$':
 		tok.Type = token.Ident
 		tok.Row = l.row
@@ -166,6 +176,15 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.readRune()
 	return tok
+}
+
+func (l *Lexer) readNAssign(tok *token.Token, typ token.Type) {
+	tok.Type = typ
+	tok.Row = l.row
+	tok.Column = l.column
+	tok.Literal = string([]rune{l.rune, l.peekRune()})
+	l.readRune()
+	l.readRune()
 }
 
 func (l *Lexer) readLineComment() string {

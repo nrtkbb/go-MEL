@@ -238,6 +238,10 @@ string $ls[] = ` + "`ls -sl`" + `;
 {1, 2};
 
 int $t = true && false || true;
+$t += 1;
+$t -= 1;
+$t *= 2;
+$t /= 2;
 `
 
 	tests := []struct {
@@ -401,6 +405,22 @@ int $t = true && false || true;
 		{token.False, "false"},
 		{token.Or, "||"},
 		{token.True, "true"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.PAssign, "+="},
+		{token.Int, "1"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.MAssign, "-="},
+		{token.Int, "1"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.AAssign, "*="},
+		{token.Int, "2"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.SAssign, "/="},
+		{token.Int, "2"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}

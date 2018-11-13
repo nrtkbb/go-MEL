@@ -44,6 +44,10 @@ const (
 	Coron    = ":"
 
 	Eq        = "=="
+	PAssign   = "+="
+	MAssign   = "-="
+	SAssign   = "/="
+	AAssign   = "*="
 	NotEq     = "!="
 	And       = "&&"
 	Or        = "||"
