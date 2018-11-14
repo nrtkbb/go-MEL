@@ -173,6 +173,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVectorStatement()
 	case token.MatrixDec:
 		return p.parseMatrixStatement()
+	case token.Lbrace:
+		return p.parseBlockStatement()
 	case token.Break:
 		return p.parseBreakStatement()
 	case token.Continue:
