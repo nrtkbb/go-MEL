@@ -76,7 +76,6 @@ const (
 	FloatDec  = "FloatDec"
 	VectorDec = "VectorDec"
 	MatrixDec = "MatrixDec"
-	BoolDec   = "BoolDec"
 	If        = "If"
 	While     = "While"
 	Do        = "Do"
@@ -103,7 +102,6 @@ var keywords = map[string]Type{
 	"false":    False,
 	"on":       On,
 	"off":      Off,
-	"bool":     BoolDec,
 	"if":       If,
 	"while":    While,
 	"do":       Do,

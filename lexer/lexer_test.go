@@ -12,8 +12,6 @@ true;
 false;
 on;
 off;
-bool $t = true;
-bool $f = false;
 `
 
 	tests := []struct {
@@ -27,16 +25,6 @@ bool $f = false;
 		{token.On, "on"},
 		{token.Semicolon, ";"},
 		{token.Off, "off"},
-		{token.Semicolon, ";"},
-		{token.BoolDec, "bool"},
-		{token.Ident, "$t"},
-		{token.Assign, "="},
-		{token.True, "true"},
-		{token.Semicolon, ";"},
-		{token.BoolDec, "bool"},
-		{token.Ident, "$f"},
-		{token.Assign, "="},
-		{token.False, "false"},
 		{token.Semicolon, ";"},
 	}
 
