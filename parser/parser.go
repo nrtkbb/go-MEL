@@ -21,8 +21,7 @@ const (
 	PRODUCT         // *
 	CREMENT         // X++ or X--
 	PREFIX          // -X or !X
-	CALL            // myFunction(X
-	INDEX           // array[index]
+	HIGHEST         // myFunction(X and array[index]
 )
 
 var precedences = map[token.Type]int{
@@ -40,9 +39,9 @@ var precedences = map[token.Type]int{
 	token.Decrement:  CREMENT,
 	token.Question:   TERNARY,
 	token.Coron:      TERNARY,
-	token.Lparen:     CALL,
-	token.BackQuotes: CALL,
-	token.Lbracket:   INDEX,
+	token.Lparen:     HIGHEST,
+	token.BackQuotes: HIGHEST,
+	token.Lbracket:   HIGHEST,
 }
 
 type (
