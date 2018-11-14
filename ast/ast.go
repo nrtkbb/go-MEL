@@ -587,6 +587,40 @@ func (cs *CaseStatement) String() string {
 	return out.String()
 }
 
+// VariableStatement ...
+type VariableStatement struct {
+	Names   []Expression
+	Assigns []token.Token
+	Values  []Expression
+}
+
+func (vs *VariableStatement) statementNode() {}
+
+// TokenLiteral ...
+func (vs *VariableStatement) TokenLiteral() string {
+	return vs.Names[0].String()
+}
+
+// String ...
+func (vs *VariableStatement) String() string {
+	var out bytes.Buffer
+
+	var outNames []string
+	for i, name := range vs.Names {
+		if vs.Values[i] != nil {
+			outNames = append(outNames,
+				name.String()+" "+vs.Assigns[i].Literal+" "+vs.Values[i].String())
+		} else {
+			outNames = append(outNames, name.String())
+		}
+	}
+	out.WriteString(strings.Join(outNames, ", "))
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 // VectorStatement ...
 type VectorStatement struct {
 	Token   token.Token // token.VectorDec

@@ -83,6 +83,7 @@ func New(l *lexer.Lexer) *Parser {
 	// set prefix parse func.
 	p.prefixParseFns = make(map[token.Type]prefixParseFn)
 	p.registerPrefix(token.Ident, p.parseIdentifier)
+	p.registerPrefix(token.Flag, p.parseIdentifier)
 	p.registerPrefix(token.ProcIdent, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
@@ -163,6 +164,11 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseGlobalStatement()
 	case token.Proc:
 		return p.parseProcStatement()
+	case token.Ident:
+		if p.peekTokenIsAssign() || p.peekTokenIs(token.Lbracket) {
+			return p.parseVariableStatement()
+		}
+		return p.parseExpressionStatement()
 	case token.StringDec:
 		return p.parseStringStatement()
 	case token.IntDec:
@@ -420,6 +426,18 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseVariableStatement() ast.Statement {
+	stmt := &ast.VariableStatement{}
+
+	stmt.Names, stmt.Assigns, stmt.Values = p.parseBulkDefinition()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseMatrixStatement() ast.Statement {

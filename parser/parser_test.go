@@ -197,17 +197,17 @@ func TestParsingBreakStatement(t *testing.T) {
 }
 
 func TestParsingIndexExpressions(t *testing.T) {
-	input := "$myArray[1 + 1]"
+	input := "$myArray[1 + 1] = 1"
 
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	indexExp, ok := stmt.Expression.(*ast.IndexExpression)
+	stmt, ok := program.Statements[0].(*ast.VariableStatement)
+	indexExp, ok := stmt.Names[0].(*ast.IndexExpression)
 	if !ok {
-		t.Fatalf("exp not *ast.IndexExpression. got=%T", stmt.Expression)
+		t.Fatalf("stmt.Names[0] not *ast.IndexExpression. got=%T", stmt.Names[0])
 	}
 
 	if !testIdentifier(t, indexExp.Left, "$myArray") {
@@ -220,17 +220,17 @@ func TestParsingIndexExpressions(t *testing.T) {
 }
 
 func TestParsingArrayLiteral(t *testing.T) {
-	input := "{1, 2 * 2, 3 + 3};"
+	input := "$array = {1, 2 * 2, 3 + 3};"
 
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	stmt, ok := program.Statements[0].(*ast.VariableStatement)
+	array, ok := stmt.Values[0].(*ast.ArrayLiteral)
 	if !ok {
-		t.Fatalf("exp not ast.ArrayLiteral. got=%T", stmt.Expression)
+		t.Fatalf("stmt.Values[0] not ast.ArrayLiteral. got=%T", stmt.Values[0])
 	}
 
 	if len(array.Elements) != 3 {
@@ -243,7 +243,7 @@ func TestParsingArrayLiteral(t *testing.T) {
 }
 
 func TestCallExpressionParsing3(t *testing.T) {
-	input := "add 1 (2 + 3) `add 1 2 a \"b\"` a \"b\";"
+	input := "add 1 (2 + 3) `add 1 2 a \"b\"` a \"b\" -flag;"
 
 	l := lexer.New(input)
 	p := New(l)
@@ -271,7 +271,7 @@ func TestCallExpressionParsing3(t *testing.T) {
 		return
 	}
 
-	if len(exp.Arguments) != 5 {
+	if len(exp.Arguments) != 6 {
 		t.Fatalf("wrong length of arguments. got=%d\n", len(exp.Arguments))
 	}
 
@@ -279,6 +279,7 @@ func TestCallExpressionParsing3(t *testing.T) {
 	testInfixExpression(t, exp.Arguments[1], 2, "+", 3)
 	testIdentifier(t, exp.Arguments[3], "a")
 	testLiteralExpression(t, exp.Arguments[4], `"b"`)
+	testIdentifier(t, exp.Arguments[5], "-flag")
 }
 
 func TestCallExpressionParsing2(t *testing.T) {
@@ -361,7 +362,7 @@ func TestCallExpressionParsing(t *testing.T) {
 func TestGlobalStatementParsing(t *testing.T) {
 	input := `
 global proc Proc(string $x, string $y) {
-    $x + $y;
+    return $x + $y;
 }`
 	l := lexer.New(input)
 	p := New(l)
@@ -403,19 +404,19 @@ global proc Proc(string $x, string $y) {
 			len(stmt.Body.Statements))
 	}
 
-	bodyStmt, ok := stmt.Body.Statements[0].(*ast.ExpressionStatement)
+	retStmt, ok := stmt.Body.Statements[0].(*ast.ReturnStatement)
 	if !ok {
-		t.Fatalf("function body stmt is not ast.ExressionStatement. got=%T\n",
+		t.Fatalf("function body stmt is not ast.ReturnStatement. got=%T\n",
 			stmt.Body.Statements[0])
 	}
 
-	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
+	testInfixExpression(t, retStmt.ReturnValue, "$x", "+", "$y")
 }
 
 func TestProcStatementParsing(t *testing.T) {
 	input := `
 proc Proc(string $x, string $y) {
-	$x + $y;
+	return$x + $y;
 }`
 	l := lexer.New(input)
 	p := New(l)
@@ -451,13 +452,13 @@ proc Proc(string $x, string $y) {
 			len(stmt.Body.Statements))
 	}
 
-	bodyStmt, ok := stmt.Body.Statements[0].(*ast.ExpressionStatement)
+	retStmt, ok := stmt.Body.Statements[0].(*ast.ReturnStatement)
 	if !ok {
-		t.Fatalf("stmt body stmt is not ast.ExressionStatement. got=%T\n",
+		t.Fatalf("stmt body stmt is not ast.ReturnStatement. got=%T\n",
 			stmt.Body.Statements[0])
 	}
 
-	testInfixExpression(t, bodyStmt.Expression, "$x", "+", "$y")
+	testInfixExpression(t, retStmt.ReturnValue, "$x", "+", "$y")
 }
 
 func TestForInExpressionSingleBlock(t *testing.T) {
@@ -1022,13 +1023,13 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+		t.Fatalf("program.Statements[0] is not ast.VariableStatement. got=%T",
 			program.Statements[0])
 	}
 
 	ident, ok := stmt.Expression.(*ast.Identifier)
 	if !ok {
-		t.Fatalf("exp not *ast.Identifier. got=%T", stmt.Expression)
+		t.Fatalf("stmt.Expression not *ast.Identifier. got=%T", stmt.Expression)
 	}
 	if ident.Value != "$foobar" {
 		t.Errorf("ident.Value not %s. got=%s",
