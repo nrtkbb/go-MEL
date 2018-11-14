@@ -104,6 +104,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Do, p.parseDoWhileExpression)
 	p.registerPrefix(token.For, p.parseForExpression)
 	p.registerPrefix(token.BackQuotes, p.parseBackQuotesCallExpression)
+	p.registerPrefix(token.StringDec, p.parseDecIdentifier)
+	p.registerPrefix(token.IntDec, p.parseDecIdentifier)
+	p.registerPrefix(token.FloatDec, p.parseDecIdentifier)
+	p.registerPrefix(token.VectorDec, p.parseDecIdentifier)
+	p.registerPrefix(token.MatrixDec, p.parseDecIdentifier)
 
 	// set infix parse func.
 	p.infixParseFns = make(map[token.Type]infixParseFn)
@@ -975,6 +980,11 @@ func (p *Parser) parseCaseStatement() *ast.CaseStatement {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseDecIdentifier() ast.Expression {
+	p.curToken.Type = token.ProcIdent
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 

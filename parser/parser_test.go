@@ -9,6 +9,42 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestDecIdentifierParsing(t *testing.T) {
+	input := `int $i = int(1.1);`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) does not 1. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.IntegerStatement)
+	if !ok {
+		t.Fatalf("program.Statemtns[0] does not *ast.IntegerStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if len(stmt.Names) != 1 || len(stmt.Assigns) != 1 || len(stmt.Values) != 1 {
+		t.Fatalf("stmt.Names or stmt.Assigns or stmt.Values does not 1. got=%d, %d, %d",
+			len(stmt.Names), len(stmt.Assigns), len(stmt.Values))
+	}
+
+	call, ok := stmt.Values[0].(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("stmt.Values[0] does not *ast.CallExpression. got=%T",
+			stmt.Values[0])
+	}
+
+	if call.Function.String() != "int" {
+		t.Fatalf("call.Function.String() does not 'int'. got=%s",
+			call.Function.String())
+	}
+}
+
 func TestCastExpressionParsing(t *testing.T) {
 	input := `int $i = (int) 1.1;`
 
