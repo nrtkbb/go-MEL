@@ -6,7 +6,48 @@ import (
 
 	"github.com/nrtkbb/go-MEL/ast"
 	"github.com/nrtkbb/go-MEL/lexer"
+	"github.com/nrtkbb/go-MEL/token"
 )
+
+func TestCastExpressionParsing(t *testing.T) {
+	input := `int $i = (int) 1.1;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("len(program.Statements) does not 1. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.IntegerStatement)
+	if !ok {
+		t.Fatalf("program.Statemtns[0] does not *ast.IntegerStatement. got=%T",
+			program.Statements[0])
+	}
+
+	if len(stmt.Names) != 1 || len(stmt.Assigns) != 1 || len(stmt.Values) != 1 {
+		t.Fatalf("stmt.Names or stmt.Assigns or stmt.Values does not 1. got=%d, %d, %d",
+			len(stmt.Names), len(stmt.Assigns), len(stmt.Values))
+	}
+
+	cast, ok := stmt.Values[0].(*ast.CastExpression)
+	if !ok {
+		t.Fatalf("stmt.Values[0] does not *ast.CastExpression. got=%T",
+			stmt.Values[0])
+	}
+
+	if cast.Token.Type != token.IntDec {
+		t.Fatalf("cast.Token.Type is not IntDec. got=%s",
+			cast.Token.Literal)
+	}
+
+	if !testLiteralExpression(t, cast.Right, 1.1) {
+		return
+	}
+}
 
 func TestCommentParsing(t *testing.T) {
 	input := `// test

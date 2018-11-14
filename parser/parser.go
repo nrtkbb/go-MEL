@@ -594,12 +594,21 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
+	if p.curTokenIsDec() {
+		// CastExpression
+		cast := &ast.CastExpression{Token: p.curToken}
+		if !p.expectPeek(token.Rparen) {
+			return nil
+		}
+		p.nextToken()
+		cast.Right = p.parseExpression(LOWEST)
+		return cast
+	}
+	// GroupedExpression
 	exp := p.parseExpression(LOWEST)
-
 	if !p.expectPeek(token.Rparen) {
 		return nil
 	}
-
 	return exp
 }
 
@@ -1070,6 +1079,14 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 
 func (p *Parser) parseBooleanLiteral() ast.Expression {
 	return &ast.BooleanLiteral{Token: p.curToken, Value: p.curTokenIs(token.True)}
+}
+
+func (p *Parser) curTokenIsDec() bool {
+	return p.curToken.Type == token.StringDec ||
+		p.curToken.Type == token.IntDec ||
+		p.curToken.Type == token.FloatDec ||
+		p.curToken.Type == token.VectorDec ||
+		p.curToken.Type == token.MatrixDec
 }
 
 func (p *Parser) nextToken() {

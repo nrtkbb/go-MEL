@@ -191,6 +191,31 @@ func (te *TernaryExpression) String() string {
 	return out.String()
 }
 
+// CastExpression ...
+type CastExpression struct {
+	Token token.Token // string or int or float or matrix or vector
+	Right Expression
+}
+
+func (ce *CastExpression) expressionNode() {}
+
+// TokenLiteral ...
+func (ce *CastExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}
+
+// String ...
+func (ce *CastExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ce.TokenLiteral())
+	out.WriteString(") ")
+	out.WriteString(ce.Right.String())
+
+	return out.String()
+}
+
 // TypeDeclaration ...
 type TypeDeclaration struct {
 	Token   token.Token // string or int or float or matrix or vector
