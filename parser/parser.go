@@ -529,6 +529,10 @@ func (p *Parser) parseBulkDefinition() ([]ast.Expression, []token.Token, []ast.E
 	var assigns []token.Token
 	var values []ast.Expression
 
+	if p.curTokenIs(token.Semicolon) {
+		return names, assigns, values
+	}
+
 	name := p.parseExpression(LOWEST)
 	names = append(names, name)
 	if !p.peekTokenIsAssign() {
@@ -742,7 +746,9 @@ func (p *Parser) parseForExpression() ast.Expression {
 
 	p.nextToken()
 	names, assigns, values := p.parseBulkDefinition()
-	p.nextToken()
+	if len(names) != 0 {
+		p.nextToken()
+	}
 
 	if p.curTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -752,21 +758,28 @@ func (p *Parser) parseForExpression() ast.Expression {
 			InitNames:   names,
 			InitAssigns: assigns,
 			InitValues:  values,
-			Condition:   p.parseExpression(LOWEST),
 		}
 
-		if !p.expectPeek(token.Semicolon) {
+		if !p.curTokenIs(token.Semicolon) {
+			exp.Condition = p.parseExpression(LOWEST)
+			p.nextToken()
+		}
+
+		if !p.curTokenIs(token.Semicolon) {
 			return nil
 		}
-
 		p.nextToken()
-		exp.ChangeOf = p.parseExpression(LOWEST)
 
-		if !p.expectPeek(token.Rparen) {
-			return nil
+		if !p.curTokenIs(token.Rparen) {
+			exp.ChangeOf = p.parseExpression(LOWEST)
+			p.nextToken()
 		}
 
+		if !p.curTokenIs(token.Rparen) {
+			return nil
+		}
 		p.nextToken()
+
 		if p.curTokenIs(token.Lbrace) {
 			exp.Consequence = p.parseBlockStatement()
 		} else {

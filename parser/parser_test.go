@@ -554,6 +554,61 @@ func TestForInExpressionSingleBlock(t *testing.T) {
 	return
 }
 
+func TestForExpressionNils(t *testing.T) {
+	input := `for (;;) string $x = "x";`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ForExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.ForExpression. got=%T\n",
+			stmt.Expression)
+	}
+
+	if len(exp.InitNames) != 0 {
+		t.Fatalf("exp.InitNames is not len 0. got=%d", len(exp.InitNames))
+	}
+
+	if exp.Condition != nil {
+		t.Fatalf("exp.Condition is not nil. got=%q", exp.Condition)
+	}
+
+	if exp.ChangeOf != nil {
+		t.Fatalf("exp.ChangeOf is not nil. got=%q", exp.ChangeOf)
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.StringStatement, got=%T\n",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testStringStatement(t, consequence, "$x") {
+		return
+	}
+
+	val := consequence.Values[0]
+	if !testStringLiteral(t, val, `"x"`) {
+		return
+	}
+
+	return
+}
+
 func TestForExpressionSingleBlock(t *testing.T) {
 	input := `for ($i = 0; $i < 10; $i++) string $x = "x";`
 
