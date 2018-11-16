@@ -628,7 +628,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
-	if p.curTokenIsDec() {
+	if p.curTokenIsDec() && !p.peekTokenIs(token.Lparen) {
 		// CastExpression
 		cast := &ast.CastExpression{Token: p.curToken}
 		if !p.expectPeek(token.Rparen) {
