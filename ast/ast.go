@@ -308,9 +308,13 @@ func (fe *ForExpression) String() string {
 	out.WriteString(strings.Join(outNames, ", "))
 
 	out.WriteString("; ")
-	out.WriteString(fe.Condition.String())
+	if fe.Condition != nil {
+		out.WriteString(fe.Condition.String())
+	}
 	out.WriteString("; ")
-	out.WriteString(fe.ChangeOf.String())
+	if fe.ChangeOf != nil {
+		out.WriteString(fe.ChangeOf.String())
+	}
 	out.WriteString(") ")
 	out.WriteString(fe.Consequence.String())
 
