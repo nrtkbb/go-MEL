@@ -151,13 +151,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Column = l.column
 		tok.Literal = ""
 	default:
-		if isLetter(l.rune) {
-			tok.Row = l.row
-			tok.Column = l.column
-			tok.Literal = l.readIdentifier()
-			tok.Type = token.LookupIdent(tok.Literal)
-			return tok
-		} else if isDigit(l.rune) || '.' == l.rune && isDigit(l.peekRune()) {
+		if isDigit(l.rune) || '.' == l.rune && isDigit(l.peekRune()) {
 			if '0' == l.rune && 'x' == l.peekRune() {
 				tok.Type = token.Int16
 				tok.Row = l.row
@@ -169,9 +163,15 @@ func (l *Lexer) NextToken() token.Token {
 				tok.Type, tok.Literal = l.readNumber()
 			}
 			return tok
-		} else {
-			tok = newToken(token.Illegal, l.rune, l.row, l.column)
 		}
+		if isLetter(l.rune) {
+			tok.Row = l.row
+			tok.Column = l.column
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		}
+		tok = newToken(token.Illegal, l.rune, l.row, l.column)
 	}
 
 	l.readRune()
