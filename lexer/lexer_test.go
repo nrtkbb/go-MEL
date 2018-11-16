@@ -230,6 +230,8 @@ $t += 1;
 $t -= 1;
 $t *= 2;
 $t /= 2;
+$t <= 1;
+$t >= 1;
 `
 
 	tests := []struct {
@@ -409,6 +411,14 @@ $t /= 2;
 		{token.Ident, "$t"},
 		{token.SAssign, "/="},
 		{token.Int, "2"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.LtEq, "<="},
+		{token.Int, "1"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.GtEq, ">="},
+		{token.Int, "1"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}

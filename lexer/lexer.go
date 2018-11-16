@@ -76,8 +76,16 @@ func (l *Lexer) NextToken() token.Token {
 	case '!':
 		tok = l.peekRuneCheck('=', token.NotEq, token.Bang)
 	case '<':
+		if '=' == l.peekRune() {
+			l.readNAssign(&tok, token.LtEq)
+			return tok
+		}
 		tok = l.peekRuneCheck('<', token.Ltensor, token.Lt)
 	case '>':
+		if '=' == l.peekRune() {
+			l.readNAssign(&tok, token.GtEq)
+			return tok
+		}
 		tok = l.peekRuneCheck('>', token.Rtensor, token.Gt)
 	case '+':
 		if '=' == l.peekRune() {

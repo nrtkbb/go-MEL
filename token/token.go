@@ -37,8 +37,10 @@ const (
 	Asterisk = "*"
 	Bang     = "!"
 
-	Lt = "<"
-	Gt = ">"
+	Lt   = "<"
+	Gt   = ">"
+	LtEq = "<="
+	GtEq = ">="
 
 	Question = "?"
 	Coron    = ":"
