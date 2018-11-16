@@ -36,6 +36,7 @@ const (
 	Slash    = "/"
 	Asterisk = "*"
 	Bang     = "!"
+	Mod      = "%"
 
 	Lt   = "<"
 	Gt   = ">"

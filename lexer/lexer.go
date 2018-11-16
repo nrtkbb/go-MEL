@@ -95,6 +95,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.peekRuneCheck('+', token.Increment, token.Plus)
 	case '*':
 		tok = l.peekRuneCheck('=', token.AAssign, token.Asterisk)
+	case '%':
+		tok = newToken(token.Mod, l.rune, l.row, l.column)
 	case '?':
 		tok = newToken(token.Question, l.rune, l.row, l.column)
 	case ':':
