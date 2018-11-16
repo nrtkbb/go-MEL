@@ -528,7 +528,7 @@ type ProcStatement struct {
 	Name       token.Token // ProcIdent
 	ReturnType *TypeDeclaration
 	ParamTypes []*TypeDeclaration
-	Parameters []*Identifier
+	Parameters []Expression
 	Body       *BlockStatement
 }
 

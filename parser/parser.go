@@ -680,9 +680,9 @@ func (p *Parser) parseProcStatement() ast.Statement {
 	return lit
 }
 
-func (p *Parser) parseProcParameters() ([]*ast.TypeDeclaration, []*ast.Identifier) {
+func (p *Parser) parseProcParameters() ([]*ast.TypeDeclaration, []ast.Expression) {
 	var typeDeclarations []*ast.TypeDeclaration
-	var identifiers []*ast.Identifier
+	var identifiers []ast.Expression
 
 	if p.peekTokenIs(token.Rparen) {
 		p.nextToken()
@@ -692,7 +692,7 @@ func (p *Parser) parseProcParameters() ([]*ast.TypeDeclaration, []*ast.Identifie
 	typeDeclaration := p.parseTypeDeclaration()
 	typeDeclarations = append(typeDeclarations, typeDeclaration)
 	p.nextToken()
-	identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	identifier := p.parseExpression(LOWEST)
 	identifiers = append(identifiers, identifier)
 
 	for p.peekTokenIs(token.Comma) {
@@ -700,7 +700,7 @@ func (p *Parser) parseProcParameters() ([]*ast.TypeDeclaration, []*ast.Identifie
 		typeDeclaration := p.parseTypeDeclaration()
 		typeDeclarations = append(typeDeclarations, typeDeclaration)
 		p.nextToken()
-		identifier := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		identifier := p.parseExpression(LOWEST)
 		identifiers = append(identifiers, identifier)
 	}
 
@@ -719,22 +719,9 @@ func (p *Parser) parseTypeDeclaration() *ast.TypeDeclaration {
 		fallthrough
 	case token.VectorDec:
 		fallthrough
-	case token.IntDec:
-		p.nextToken()
-		td := &ast.TypeDeclaration{Token: p.curToken}
-		if p.peekTokenIs(token.Lbracket) {
-			p.nextToken()
-			if p.peekTokenIs(token.Rbracket) {
-				p.nextToken()
-				td.IsArray = true
-			} else {
-				return nil
-			}
-		} else {
-			return nil
-		}
-		return td
 	case token.MatrixDec:
+		fallthrough
+	case token.IntDec:
 		p.nextToken()
 		td := &ast.TypeDeclaration{Token: p.curToken}
 		return td

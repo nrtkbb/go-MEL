@@ -397,7 +397,7 @@ func TestCallExpressionParsing(t *testing.T) {
 
 func TestGlobalStatementParsing(t *testing.T) {
 	input := `
-global proc Proc(string $x, string $y) {
+global proc Proc(string $x[], string $y) {
     return $x + $y;
 }`
 	l := lexer.New(input)
@@ -432,7 +432,13 @@ global proc Proc(string $x, string $y) {
 			len(stmt.Parameters))
 	}
 
-	testLiteralExpression(t, stmt.Parameters[0], "$x")
+	index, ok := stmt.Parameters[0].(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("stmt.Parameters[0] is not ast.IndexExpression. got=%T",
+			stmt.Parameters[0])
+	}
+
+	testLiteralExpression(t, index.Left, "$x")
 	testLiteralExpression(t, stmt.Parameters[1], "$y")
 
 	if len(stmt.Body.Statements) != 1 {
