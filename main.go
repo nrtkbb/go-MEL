@@ -7,11 +7,15 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
+	"regexp"
 
 	"github.com/nrtkbb/go-MEL/lexer"
 	"github.com/nrtkbb/go-MEL/parser"
 	"github.com/nrtkbb/go-MEL/repl"
 )
+
+var mel = regexp.MustCompile(`.mel$`)
 
 func main() {
 	flag.Parse()
@@ -30,19 +34,57 @@ func main() {
 
 	filePaths := flag.Args()
 	for _, fp := range filePaths {
-		if _, err := os.Stat(fp); err != nil && !os.IsExist(err) {
-			log.Fatal(err)
+		stat, err := os.Stat(fp)
+		if err != nil && !os.IsExist(err) {
+			log.Println(err)
+			continue
 		}
 
-		fmt.Println(fp)
-		input, err := ioutil.ReadFile(fp)
-		if err != nil {
-			log.Fatal(err)
+		if stat.IsDir() {
+			err = readDir(fp)
+			log.Println(err)
+			continue
 		}
 
-		l := lexer.New(string(input))
-		p := parser.New(l)
-		program := p.ParseProgram()
-		fmt.Println(program.String())
+		if !mel.MatchString(fp) {
+			continue
+		}
+
+		readFile(fp)
 	}
+}
+
+func readDir(dir string) error {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+
+		if !mel.MatchString(path) {
+			return nil
+		}
+
+		err = readFile(path)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return err
+}
+
+func readFile(file string) error {
+	fmt.Println(file)
+	input, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	l := lexer.New(string(input))
+	p := parser.New(l)
+	program := p.ParseProgram()
+	fmt.Println(program.String())
+
+	return nil
 }
