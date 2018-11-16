@@ -630,6 +630,10 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 		return cast
 	}
 	// GroupedExpression
+	preCommandMode := p.commandStyleMode
+	p.commandStyleMode = false
+	defer func() { p.commandStyleMode = preCommandMode }()
+
 	exp := p.parseExpression(LOWEST)
 	if !p.expectPeek(token.Rparen) {
 		return nil

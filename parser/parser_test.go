@@ -243,7 +243,7 @@ func TestParsingArrayLiteral(t *testing.T) {
 }
 
 func TestCallExpressionParsing3(t *testing.T) {
-	input := "add 1 (2 + 3) `add 1 2 a \"b\"` a \"b\" -flag;"
+	input := "add 1 (2 + 3) `add 1 (add(1)) a \"b\"` a \"b\" -flag;"
 
 	l := lexer.New(input)
 	p := New(l)
@@ -280,6 +280,42 @@ func TestCallExpressionParsing3(t *testing.T) {
 	testIdentifier(t, exp.Arguments[3], "a")
 	testLiteralExpression(t, exp.Arguments[4], `"b"`)
 	testIdentifier(t, exp.Arguments[5], "-flag")
+
+	call, ok := exp.Arguments[2].(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("exp.Arguments[2] is not ast.CallExpression. got=%T",
+			exp.Arguments[2])
+	}
+
+	if call.Function == nil || call.Function.Value != "add" {
+		t.Fatalf("call.Function is nil or not 'add'. got=%q",
+			call.Function)
+	}
+
+	if len(call.Arguments) != 4 {
+		t.Fatalf("wrong length of arguments. got=%d\n", len(call.Arguments))
+	}
+
+	testLiteralExpression(t, call.Arguments[0], 1)
+	testLiteralExpression(t, call.Arguments[2], "a")
+	testLiteralExpression(t, call.Arguments[3], `"b"`)
+
+	call2, ok := call.Arguments[1].(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("call.Arguments[1] is not ast.CallExpression. got=%T",
+			call2.Arguments[1])
+	}
+
+	if call2.Function == nil || call2.Function.Value != "add" {
+		t.Fatalf("call.Function is nil or not 'add'. got=%q",
+			call2.Function)
+	}
+
+	if len(call2.Arguments) != 1 {
+		t.Fatalf("wrong length of arguments. got=%d\n", len(call2.Arguments))
+	}
+
+	testLiteralExpression(t, call2.Arguments[0], 1)
 }
 
 func TestCallExpressionParsing2(t *testing.T) {
