@@ -88,6 +88,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.Flag, p.parseIdentifier)
 	p.registerPrefix(token.ProcIdent, p.parseIdentifier)
 	p.registerPrefix(token.Int, p.parseIntegerLiteral)
+	p.registerPrefix(token.Int16, p.parseIntegerLiteral)
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
 	p.registerPrefix(token.String, p.parseStringLiteral)
 	p.registerPrefix(token.Bang, p.parsePrefixExpression)
