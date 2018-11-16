@@ -587,8 +587,8 @@ func TestForExpressionNils(t *testing.T) {
 		t.Fatalf("exp.Condition is not nil. got=%q", exp.Condition)
 	}
 
-	if exp.ChangeOfs != nil {
-		t.Fatalf("exp.ChangeOfs is not nil. got=%q", exp.ChangeOfs)
+	if exp.ChangeOf != nil {
+		t.Fatalf("exp.ChangeOf is not nil. got=%q", exp.ChangeOf)
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
@@ -646,8 +646,8 @@ func TestForExpressionSingleBlock(t *testing.T) {
 		return
 	}
 
-	if exp.ChangeOfs[0].String() != "($i++)" {
-		t.Errorf("exp.ChangeOfs is not '%s'. got=%s", "($i++)", exp.ChangeOfs[0].String())
+	if exp.ChangeOf.String() != "($i++)" {
+		t.Errorf("exp.ChangeOf is not '%s'. got=%s", "($i++)", exp.ChangeOf.String())
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
