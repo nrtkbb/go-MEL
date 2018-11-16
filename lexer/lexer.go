@@ -280,7 +280,8 @@ func isFlag(r rune) bool {
 }
 
 func isLetter(r rune) bool {
-	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '_' == r || '.' == r
+	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' ||
+		'_' == r || '.' == r || '|' == r
 }
 
 func isIdentifier(r rune) bool {
