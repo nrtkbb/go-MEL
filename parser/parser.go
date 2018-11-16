@@ -424,6 +424,10 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 		return exp
 	}
 
+	preCommandMode := p.commandStyleMode
+	p.commandStyleMode = false
+	defer func() { p.commandStyleMode = preCommandMode }()
+
 	exp.Index = p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.Rbracket) {
