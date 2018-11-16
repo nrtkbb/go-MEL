@@ -777,8 +777,15 @@ func (p *Parser) parseForExpression() ast.Expression {
 		}
 		p.nextToken()
 
-		if !p.curTokenIs(token.Rparen) {
-			exp.ChangeOf = p.parseStatement()
+		for (!p.curTokenIs(token.Rparen) || p.curTokenIs(token.Comma)) &&
+			!p.curTokenIs(token.EOF) {
+			if p.curTokenIs(token.Comma) {
+				p.nextToken()
+			}
+			if p.curTokenIs(token.Rparen) {
+				break
+			}
+			exp.ChangeOfs = append(exp.ChangeOfs, p.parseStatement())
 			p.nextToken()
 		}
 

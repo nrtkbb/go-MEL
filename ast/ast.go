@@ -278,7 +278,7 @@ type ForExpression struct {
 	InitAssigns []token.Token
 	InitValues  []Expression
 	Condition   Expression
-	ChangeOf    Statement
+	ChangeOfs   []Statement
 	Consequence *BlockStatement
 }
 
@@ -313,9 +313,14 @@ func (fe *ForExpression) String() string {
 	}
 	out.WriteString("; ")
 
-	if fe.ChangeOf != nil {
-		out.WriteString(fe.ChangeOf.String())
+	if len(fe.ChangeOfs) != 0 {
+		var outChangeOf []string
+		for _, changeOf := range fe.ChangeOfs {
+			outChangeOf = append(outChangeOf, changeOf.String())
+		}
+		out.WriteString(strings.Join(outChangeOf, ", "))
 	}
+
 	out.WriteString(") ")
 	out.WriteString(fe.Consequence.String())
 

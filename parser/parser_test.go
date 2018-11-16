@@ -524,7 +524,7 @@ func TestForInExpressionSingleBlock(t *testing.T) {
 
 	exp, ok := stmt.Expression.(*ast.ForInExpression)
 	if !ok {
-		t.Fatalf("stmt.Expression is not ast.ForExpression. got=%T\n",
+		t.Fatalf("stmt.Expression is not ast.ForInExpression. got=%T\n",
 			stmt.Expression)
 	}
 
@@ -534,6 +534,61 @@ func TestForInExpressionSingleBlock(t *testing.T) {
 
 	if !testIdentifier(t, exp.ArrayElement, "$array") {
 		return
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.StringStatement, got=%T\n",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testStringStatement(t, consequence, "$x") {
+		return
+	}
+
+	val := consequence.Values[0]
+	if !testStringLiteral(t, val, `"x"`) {
+		return
+	}
+
+	return
+}
+
+func TestForExpressionPrefix(t *testing.T) {
+	input := `for (;;++$i, ++$j) string $x = "x";`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T\n",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.ForExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.ForExpression. got=%T\n",
+			stmt.Expression)
+	}
+
+	if len(exp.InitNames) != 0 {
+		t.Fatalf("exp.InitNames is not len 0. got=%d", len(exp.InitNames))
+	}
+
+	if exp.Condition != nil {
+		t.Fatalf("exp.Condition is not nil. got=%q", exp.Condition)
+	}
+
+	if len(exp.ChangeOfs) != 2 {
+		t.Fatalf("len(exp.ChangeOfs) is not 2. got=%q", len(exp.ChangeOfs))
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
@@ -587,8 +642,8 @@ func TestForExpressionNils(t *testing.T) {
 		t.Fatalf("exp.Condition is not nil. got=%q", exp.Condition)
 	}
 
-	if exp.ChangeOf != nil {
-		t.Fatalf("exp.ChangeOf is not nil. got=%q", exp.ChangeOf)
+	if len(exp.ChangeOfs) != 0 {
+		t.Fatalf("exp.ChangeOf is not nil. got=%q", exp.ChangeOfs[0])
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
@@ -646,8 +701,8 @@ func TestForExpressionSingleBlock(t *testing.T) {
 		return
 	}
 
-	if exp.ChangeOf.String() != "($i++)" {
-		t.Errorf("exp.ChangeOf is not '%s'. got=%s", "($i++)", exp.ChangeOf.String())
+	if exp.ChangeOfs[0].String() != "($i++)" {
+		t.Errorf("exp.ChangeOf is not '%s'. got=%s", "($i++)", exp.ChangeOfs[0].String())
 	}
 
 	consequence, ok := exp.Consequence.Statements[0].(*ast.StringStatement)
