@@ -232,6 +232,7 @@ $t *= 2;
 $t /= 2;
 $t <= 1;
 $t >= 1;
+1e-6
 `
 
 	tests := []struct {
@@ -420,6 +421,7 @@ $t >= 1;
 		{token.GtEq, ">="},
 		{token.Int, "1"},
 		{token.Semicolon, ";"},
+		{token.Float, "1e-6"},
 		{token.EOF, ""},
 	}
 

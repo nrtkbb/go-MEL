@@ -315,6 +315,7 @@ func (l *Lexer) readNumber() (token.Type, string) {
 	}
 	if 'e' == l.rune || 'E' == l.rune {
 		if '-' == l.peekRune() || '+' == l.peekRune() {
+			typ = token.Float
 			l.readRune() // 'e' or 'E'
 			l.readRune() // '-' or '+'
 			for isDigit(l.rune) {
