@@ -298,18 +298,16 @@ func (p *Parser) parseTernaryExpression(conditional ast.Expression) ast.Expressi
 		Token1:      p.curToken,
 		Operator1:   p.curToken.Literal,
 	}
-	precedences := p.curPrecedence()
 
 	p.nextToken()
-	expression.TrueExp = p.parseExpression(precedences)
+	expression.TrueExp = p.parseExpression(LOWEST)
 	p.nextToken()
 
 	expression.Token2 = p.curToken
 	expression.Operator2 = p.curToken.Literal
-	precedences = p.curPrecedence()
 
 	p.nextToken()
-	expression.FalseExp = p.parseExpression(precedences)
+	expression.FalseExp = p.parseExpression(LOWEST)
 
 	return expression
 }
