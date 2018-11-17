@@ -6,6 +6,43 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestIsLetterToken(t *testing.T) {
+	input := `
+|all|body|;
+($ident1||$ident2);
+`
+
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.ProcIdent, "|all|body|"},
+		{token.Semicolon, ";"},
+		{token.Lparen, "("},
+		{token.Ident, "$ident1"},
+		{token.Or, "||"},
+		{token.Ident, "$ident2"},
+		{token.Rparen, ")"},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestBooleanToken(t *testing.T) {
 	input := `
 true;

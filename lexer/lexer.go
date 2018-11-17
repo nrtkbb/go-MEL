@@ -69,8 +69,6 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.rune {
 	case '&':
 		tok = l.peekRuneCheck('&', token.And, token.Illegal)
-	case '|':
-		tok = l.peekRuneCheck('|', token.Or, token.Illegal)
 	case '=':
 		tok = l.peekRuneCheck('=', token.Eq, token.Assign)
 	case '!':
@@ -154,6 +152,21 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Row = l.row
 		tok.Column = l.column
 		tok.Literal = l.readString()
+		return tok
+	case '|':
+		if l.peekRune() == '|' {
+			l.readRune()
+			l.readRune()
+			tok.Type = token.Or
+			tok.Row = l.row
+			tok.Column = l.column
+			tok.Literal = "||"
+			return tok
+		}
+		tok.Row = l.row
+		tok.Column = l.column
+		tok.Literal = l.readLetterIdentifier()
+		tok.Type = token.LookupIdent(tok.Literal)
 		return tok
 	case 0:
 		tok.Type = token.EOF
@@ -266,6 +279,15 @@ func (l *Lexer) readString() string {
 	return string(l.input[position:l.position])
 }
 
+func (l *Lexer) readLetterIdentifier() string {
+	position := l.position
+	l.readRune()
+	for isLetter(l.rune) {
+		l.readRune()
+	}
+	return string(l.input[position:l.position])
+}
+
 func (l *Lexer) readIdentifier() string {
 	position := l.position
 	l.readRune() // '$'
@@ -285,7 +307,8 @@ func isLetter(r rune) bool {
 }
 
 func isIdentifier(r rune) bool {
-	return isLetter(r) || '0' <= r && r <= '9'
+	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' ||
+		'_' == r || '0' <= r && r <= '9'
 }
 
 func (l *Lexer) readHexadecimalNumber() string {
