@@ -223,6 +223,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	if p.curTokenIs(token.ProcIdent) &&
 		!p.peekTokenIs(token.Lparen) &&
+		nil != p.prefixParseFns[p.peekToken.Type] &&
 		p.commandStyleMode == false {
 		leftExp = p.parseCommandCallExpression(leftExp)
 	}

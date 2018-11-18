@@ -195,7 +195,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = "."
 			return tok
 		}
-		if isLetter(l.rune) {
+		if isLetterFirst(l.rune) {
 			tok.Row = l.row
 			tok.Column = l.column
 			tok.Literal = l.readLetterIdentifier()
@@ -309,9 +309,14 @@ func isFlag(r rune) bool {
 	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9'
 }
 
-func isLetter(r rune) bool {
+func isLetterFirst(r rune) bool {
 	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' ||
 		'_' == r || '.' == r || '|' == r
+}
+
+func isLetter(r rune) bool {
+	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' ||
+		'_' == r || '.' == r || '|' == r || '0' <= r && r <= '9'
 }
 
 func isIdentifier(r rune) bool {
