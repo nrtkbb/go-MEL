@@ -187,7 +187,7 @@ func (l *Lexer) NextToken() token.Token {
 			}
 			return tok
 		}
-		if '.' == l.rune {
+		if '.' == l.rune && '.' != l.peekRune() {
 			l.readRune()
 			tok.Type = token.Dot
 			tok.Row = l.row
@@ -198,7 +198,7 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.rune) {
 			tok.Row = l.row
 			tok.Column = l.column
-			tok.Literal = l.readIdentifier()
+			tok.Literal = l.readLetterIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
 		}
