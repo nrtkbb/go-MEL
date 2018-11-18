@@ -1166,6 +1166,11 @@ func (p *Parser) parseExpressionList(end token.Type) []ast.Expression {
 	}
 
 	p.nextToken()
+
+	preCommandMode := p.commandStyleMode
+	p.commandStyleMode = false
+	defer func() { p.commandStyleMode = preCommandMode }()
+
 	list = append(list, p.parseExpression(LOWEST))
 
 	for p.peekTokenIs(token.Comma) {
