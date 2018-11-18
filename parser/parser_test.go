@@ -26,10 +26,6 @@ func TestParserExample1(t *testing.T) {
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
-		for _, stmt := range program.Statements {
-			fmt.Printf("%v, %T\n", stmt, stmt)
-		}
-
 		if len(program.Statements) != 1 {
 			t.Fatalf("len(program.Statements) does not 1. got=%d",
 				len(program.Statements))
