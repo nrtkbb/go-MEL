@@ -423,8 +423,6 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	// first argument.
 	exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
 
-	//fmt.Println(p.curToken, p.peekToken)
-
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 		return exp
@@ -434,12 +432,10 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 		for p.peekTokenIs(token.Comma) && !p.peekTokenIs(token.EOF) {
 			p.nextToken()
 			p.nextToken()
-			fmt.Println("for ", p.curToken, p.peekToken)
 			exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
 		}
 		fmt.Println(p.curToken, p.peekToken)
 		if !p.expectPeek(token.Rparen) {
-			fmt.Println("expectPeek(token.Rparen) error ", p.curToken, p.peekToken)
 			return nil
 		}
 		return exp
