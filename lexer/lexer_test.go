@@ -6,6 +6,48 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestLexerExample1(t *testing.T) {
+	input := `setAttr ($tforms[0] + ".translateZ") (-1.0 * $val);`
+
+	tests := []struct {
+		expectedType    token.Type
+		expectedLiteral string
+	}{
+		{token.ProcIdent, "setAttr"},
+		{token.Lparen, "("},
+		{token.Ident, "$tforms"},
+		{token.Lbracket, "["},
+		{token.Int, "0"},
+		{token.Rbracket, "]"},
+		{token.Plus, "+"},
+		{token.String, `".translateZ"`},
+		{token.Rparen, ")"},
+		{token.Lparen, "("},
+		{token.Minus, "-"},
+		{token.Float, "1.0"},
+		{token.Asterisk, "*"},
+		{token.Ident, "$val"},
+		{token.Rparen, ")"},
+		{token.Semicolon, ";"},
+	}
+
+	l := New(input)
+
+	for i, tt := range tests {
+		tok := l.NextToken()
+
+		if tok.Type != tt.expectedType {
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q %q",
+				i, tt.expectedType, tok.Type, tok.Literal)
+		}
+
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
+		}
+	}
+}
+
 func TestIsLetterToken(t *testing.T) {
 	input := `
 |all|body|;

@@ -411,7 +411,49 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 		return nil
 	}
 	exp := &ast.CallExpression{Token: p.curToken, Function: ident}
-	exp.Arguments = p.parseExpressionList(token.Rparen)
+
+	if p.peekTokenIs(token.Rparen) {
+		// no arguments call expression.
+		p.nextToken()
+		return exp
+	}
+
+	p.nextToken()
+
+	// first argument.
+	exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
+
+	//fmt.Println(p.curToken, p.peekToken)
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+		return exp
+	}
+
+	if p.peekTokenIs(token.Comma) {
+		for p.peekTokenIs(token.Comma) && !p.peekTokenIs(token.EOF) {
+			p.nextToken()
+			p.nextToken()
+			fmt.Println("for ", p.curToken, p.peekToken)
+			exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
+		}
+		fmt.Println(p.curToken, p.peekToken)
+		if !p.expectPeek(token.Rparen) {
+			fmt.Println("expectPeek(token.Rparen) error ", p.curToken, p.peekToken)
+			return nil
+		}
+		return exp
+	}
+
+	if p.peekTokenIs(token.Rparen) {
+		p.nextToken()
+		for p.prefixParseFns[p.peekToken.Type] != nil {
+			p.nextToken()
+			exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
+		}
+		return exp
+	}
+
 	return exp
 }
 
@@ -1162,7 +1204,7 @@ func (p *Parser) expectPeek(t token.Type) bool {
 }
 
 func (p *Parser) peekError(t token.Type) {
-	msg := fmt.Sprintf("line:%d.%d expected next token to be %s, got %s instead",
+	msg := fmt.Sprintf("line:%d.%d expected next token to be '%s' got '%s' instead",
 		p.peekToken.Row, p.peekToken.Column, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }

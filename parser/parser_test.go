@@ -9,6 +9,46 @@ import (
 	"github.com/nrtkbb/go-MEL/token"
 )
 
+func TestParserExample1(t *testing.T) {
+	inputs := []string{
+		`setAttr ($tforms[0] + ".translateZ") (-1.0 * $val);`,
+		`setAttr "persp.translateX" 10;`,
+		`setAttr("persp.translateX", 10);`,
+		`setAttr("persp." + "translateX") 10;`,
+		`setAttr("persp." + "translateX") (5 + 5);`,
+		`setAttr"persp.translateX" 10;`,
+		`setAttr("persp.translateX")10;`,
+	}
+
+	for _, input := range inputs {
+		l := lexer.New(input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		for _, stmt := range program.Statements {
+			fmt.Printf("%v, %T\n", stmt, stmt)
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("len(program.Statements) does not 1. got=%d",
+				len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statemtns[0] does not *ast.ExpressionStatement. got=%T",
+				program.Statements[0])
+		}
+
+		_, ok = stmt.Expression.(*ast.CallExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression does not *ast.CallExpression. got=%T",
+				stmt.Expression)
+		}
+	}
+}
+
 func TestDecIdentifierParsing(t *testing.T) {
 	input := `int $i = int(1.1);`
 
