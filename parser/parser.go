@@ -18,7 +18,7 @@ const (
 	EQUALS          // ==
 	LESSGREATER     // > or <
 	SUM             // +
-	PRODUCT         // *
+	PRODUCT         // * / % ^
 	CREMENT         // X++ or X--
 	PREFIX          // -X or !X
 	HIGHEST         // myFunction(X and array[index]
@@ -41,6 +41,7 @@ var precedences = map[token.Type]int{
 	token.Increment:  CREMENT,
 	token.Decrement:  CREMENT,
 	token.Dot:        CREMENT,
+	token.Hat:        CREMENT,
 	token.Question:   TERNARY,
 	token.Coron:      TERNARY,
 	token.Lparen:     HIGHEST,
@@ -132,6 +133,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.And, p.parseInfixExpression)
 	p.registerInfix(token.Or, p.parseInfixExpression)
 	p.registerInfix(token.Dot, p.parseInfixExpression)
+	p.registerInfix(token.Hat, p.parseInfixExpression)
 	p.registerInfix(token.Lparen, p.parseCallExpression)
 	p.registerInfix(token.Lbracket, p.parseIndexExpression)
 

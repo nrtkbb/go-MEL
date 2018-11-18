@@ -117,6 +117,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Rbracket, l.rune, l.row, l.column)
 	case ',':
 		tok = newToken(token.Comma, l.rune, l.row, l.column)
+	case '^':
+		tok = newToken(token.Hat, l.rune, l.row, l.column)
 	case '-':
 		if '=' == l.peekRune() {
 			l.readNAssign(&tok, token.MAssign)

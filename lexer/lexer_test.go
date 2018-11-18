@@ -314,6 +314,7 @@ $t >= 1;
 1e-6;
 $t.x;
 setParent ..;
+$t ^ $t;
 `
 
 	tests := []struct {
@@ -510,6 +511,10 @@ setParent ..;
 		{token.Semicolon, ";"},
 		{token.ProcIdent, "setParent"},
 		{token.ProcIdent, ".."},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.Hat, "^"},
+		{token.Ident, "$t"},
 		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}

@@ -38,6 +38,7 @@ const (
 	Bang     = "!"
 	Mod      = "%"
 	Dot      = "."
+	Hat      = "^"
 
 	Lt   = "<"
 	Gt   = ">"
