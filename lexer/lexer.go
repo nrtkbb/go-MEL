@@ -97,8 +97,6 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.Mod, l.rune, l.row, l.column)
 	case '?':
 		tok = newToken(token.Question, l.rune, l.row, l.column)
-	case ':':
-		tok = newToken(token.Coron, l.rune, l.row, l.column)
 	case ';':
 		tok = newToken(token.Semicolon, l.rune, l.row, l.column)
 	case '`':
@@ -190,13 +188,16 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 		if '.' == l.rune && '.' != l.peekRune() {
+			tok = newToken(token.Dot, l.rune, l.row, l.column)
 			l.readRune()
-			tok.Type = token.Dot
-			tok.Row = l.row
-			tok.Column = l.column
-			tok.Literal = "."
 			return tok
 		}
+		if ':' == l.rune && !isLetterFirst(l.peekRune()) {
+			tok = newToken(token.Coron, l.rune, l.row, l.column)
+			l.readRune()
+			return tok
+		}
+
 		if isLetterFirst(l.rune) {
 			tok.Row = l.row
 			tok.Column = l.column
@@ -292,7 +293,8 @@ func (l *Lexer) readString() string {
 func (l *Lexer) readLetterIdentifier() string {
 	position := l.position
 	l.readRune()
-	for isLetter(l.rune) {
+	for isLetter(l.rune) ||
+		':' == l.rune && isLetter(l.peekRune()) { // last Coron is bad
 		l.readRune()
 	}
 	return string(l.input[position:l.position])
@@ -313,7 +315,7 @@ func isFlag(r rune) bool {
 
 func isLetterFirst(r rune) bool {
 	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' ||
-		'_' == r || '.' == r || '|' == r
+		'_' == r || '.' == r || '|' == r || ':' == r
 }
 
 func isLetter(r rune) bool {
