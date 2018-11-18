@@ -311,7 +311,8 @@ $t *= 2;
 $t /= 2;
 $t <= 1;
 $t >= 1;
-1e-6
+1e-6;
+$t.x;
 `
 
 	tests := []struct {
@@ -501,6 +502,11 @@ $t >= 1;
 		{token.Int, "1"},
 		{token.Semicolon, ";"},
 		{token.Float, "1e-6"},
+		{token.Semicolon, ";"},
+		{token.Ident, "$t"},
+		{token.Dot, "."},
+		{token.ProcIdent, "x"},
+		{token.Semicolon, ";"},
 		{token.EOF, ""},
 	}
 

@@ -187,6 +187,14 @@ func (l *Lexer) NextToken() token.Token {
 			}
 			return tok
 		}
+		if '.' == l.rune {
+			l.readRune()
+			tok.Type = token.Dot
+			tok.Row = l.row
+			tok.Column = l.column
+			tok.Literal = "."
+			return tok
+		}
 		if isLetter(l.rune) {
 			tok.Row = l.row
 			tok.Column = l.column

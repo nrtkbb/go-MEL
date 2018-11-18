@@ -37,6 +37,7 @@ const (
 	Asterisk = "*"
 	Bang     = "!"
 	Mod      = "%"
+	Dot      = "."
 
 	Lt   = "<"
 	Gt   = ">"
