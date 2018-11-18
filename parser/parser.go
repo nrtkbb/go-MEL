@@ -443,6 +443,11 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 
 	if p.peekTokenIs(token.Rparen) {
 		p.nextToken()
+
+		preCommandMode := p.commandStyleMode
+		p.commandStyleMode = true
+		defer func() { p.commandStyleMode = preCommandMode }()
+
 		for p.prefixParseFns[p.peekToken.Type] != nil {
 			p.nextToken()
 			exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
