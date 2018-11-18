@@ -775,6 +775,15 @@ func (p *Parser) parseTypeDeclaration() *ast.TypeDeclaration {
 	case token.IntDec:
 		p.nextToken()
 		td := &ast.TypeDeclaration{Token: p.curToken}
+		if p.peekTokenIs(token.Lbracket) {
+			p.nextToken()
+			if p.peekTokenIs(token.Rbracket) {
+				p.nextToken()
+				td.IsArray = true
+			} else {
+				return nil
+			}
+		}
 		return td
 	}
 	return nil
