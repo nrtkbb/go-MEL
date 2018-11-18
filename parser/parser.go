@@ -436,7 +436,6 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 			p.nextToken()
 			exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
 		}
-		fmt.Println(p.curToken, p.peekToken)
 		if !p.expectPeek(token.Rparen) {
 			return nil
 		}
