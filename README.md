@@ -23,8 +23,8 @@ from https://en.wikipedia.org/wiki/Maya_Embedded_Language
 ## Appreciation
 
 This program was made with reference to the book "Go言語でつくるインタプリタ".  
-Without this book, go-MEL would not have existed.  
-I cannot thank this book enough. I'd say you really help for Inspiration.  
+Without the book, go-MEL would not have existed.  
+I cannot thank the book author enough. I'd say the author really help for Inspiration.  
   
 https://interpreterbook.com/  
 https://www.oreilly.co.jp/books/9784873118222/
