@@ -28,3 +28,8 @@ I cannot thank the book author enough. I'd say the author really help for Inspir
   
 https://interpreterbook.com/  
 https://www.oreilly.co.jp/books/9784873118222/
+
+
+## License
+
+[MIT © nrtkbb](./LICENSE)
